@@ -138,9 +138,6 @@ const perPersonInput = document.getElementById("perPerson");
 const shareCodeTextarea = document.getElementById("shareCode");
 const refreshShareCodeBtn = document.getElementById("refreshShareCodeBtn");
 const shareMenuOptions = document.getElementById("shareMenuOptions");
-const shareCodeTextarea = document.getElementById("shareCode");
-const refreshShareCodeBtn = document.getElementById("refreshShareCodeBtn");
-const shareMenuOptions = document.getElementById("shareMenuOptions");
 
 const summaryTextTextarea = document.getElementById("summaryText");
 const generateSummaryBtn = document.getElementById("generateSummaryBtn");
@@ -148,161 +145,6 @@ const generateSummaryBtn = document.getElementById("generateSummaryBtn");
 const importCodeTextarea = document.getElementById("importCode");
 const importBtn = document.getElementById("importBtn");
 
-const sortSelect = document.getElementById("sortSelect");
-const searchInput = document.getElementById("searchInput");
-
-const topBar = document.querySelector(".top-bar");
-const dialogBackdrop = document.getElementById("dialogBackdrop");
-const dialogTitle = document.getElementById("dialogTitle");
-const dialogContent = document.getElementById("dialogContent");
-const dialogCancel = document.getElementById("dialogCancel");
-const dialogConfirm = document.getElementById("dialogConfirm");
-
-async function openDialog({
-  title = "",
-  message = "",
-  contentNode = null,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
-  focusElement = null
-} = {}) {
-  if (!dialogBackdrop || !dialogTitle || !dialogContent || !dialogCancel || !dialogConfirm) {
-    return false;
-  }
-
-  dialogTitle.textContent = title;
-  dialogContent.innerHTML = "";
-
-  if (contentNode) {
-    dialogContent.appendChild(contentNode);
-  } else if (message) {
-    const p = document.createElement("p");
-    p.textContent = message;
-    dialogContent.appendChild(p);
-  }
-
-  dialogConfirm.textContent = confirmText;
-  dialogCancel.textContent = cancelText;
-
-  dialogBackdrop.hidden = false;
-
-  const target = focusElement || dialogConfirm;
-  setTimeout(() => {
-    target?.focus();
-  }, 0);
-
-  return new Promise(resolve => {
-    function cleanup(result) {
-      dialogBackdrop.hidden = true;
-      dialogConfirm.removeEventListener("click", onConfirm);
-      dialogCancel.removeEventListener("click", onCancel);
-      dialogBackdrop.removeEventListener("click", onBackdropClick);
-      document.removeEventListener("keydown", onKeydown);
-      resolve(result);
-    }
-
-    function onConfirm(event) {
-      event.preventDefault();
-      cleanup(true);
-    }
-
-    function onCancel(event) {
-      event.preventDefault();
-      cleanup(false);
-    }
-
-    function onBackdropClick(event) {
-      if (event.target === dialogBackdrop) {
-        cleanup(false);
-      }
-    }
-
-    function onKeydown(event) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        cleanup(false);
-      } else if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
-        event.preventDefault();
-        cleanup(true);
-      }
-    }
-
-    dialogConfirm.addEventListener("click", onConfirm);
-    dialogCancel.addEventListener("click", onCancel);
-    dialogBackdrop.addEventListener("click", onBackdropClick);
-    document.addEventListener("keydown", onKeydown);
-  });
-}
-
-function confirmDialog(message, options = {}) {
-  return openDialog({
-    title: options.title || "Confirm",
-    message,
-    confirmText: options.confirmText || "Confirm",
-    cancelText: options.cancelText || "Cancel"
-  });
-}
-
-async function promptItemDetails(existingItem) {
-  const form = document.createElement("form");
-  const nameLabel = document.createElement("label");
-  nameLabel.textContent = "Item name";
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.value = existingItem.name;
-  nameInput.required = true;
-  nameLabel.appendChild(nameInput);
-
-  const categoryLabel = document.createElement("label");
-  categoryLabel.textContent = "Category";
-  const categoryInput = document.createElement("input");
-  categoryInput.type = "text";
-  categoryInput.value = existingItem.category || "";
-  categoryLabel.appendChild(categoryInput);
-
-  const priceLabel = document.createElement("label");
-  priceLabel.textContent = "Price";
-  const priceInput = document.createElement("input");
-  priceInput.type = "number";
-  priceInput.step = "0.01";
-  priceInput.min = "0";
-  priceInput.value = existingItem.price.toFixed(2);
-  priceLabel.appendChild(priceInput);
-
-  form.appendChild(nameLabel);
-  form.appendChild(categoryLabel);
-  form.appendChild(priceLabel);
-
-  const confirmed = await openDialog({
-    title: "Edit item",
-    contentNode: form,
-    confirmText: "Save",
-    cancelText: "Cancel",
-    focusElement: nameInput
-  });
-
-  if (!confirmed) return null;
-
-  const trimmedName = nameInput.value.trim();
-  const trimmedCategory = categoryInput.value.trim();
-  const priceValue = parseFloat(priceInput.value.trim());
-
-  if (!trimmedName) {
-    showMessage("error", "Name cannot be empty.");
-    return null;
-  }
-
-  if (isNaN(priceValue) || priceValue < 0) {
-    showMessage("error", "Please enter a valid non-negative price.");
-    return null;
-  }
-
-  return {
-    name: trimmedName,
-    category: trimmedCategory,
-    price: priceValue
-  };
-}
 const sortSelect = document.getElementById("sortSelect");
 const searchInput = document.getElementById("searchInput");
 
@@ -582,12 +424,6 @@ function renderItems() {
         });
         if (ok) deleteItemAtIndex(actualIndex);
       });
-      deleteBtn.addEventListener("click", async () => {
-        const ok = await confirmDialog(`Delete "${item.name}" from this list?`, {
-          confirmText: "Delete"
-        });
-        if (ok) deleteItemAtIndex(actualIndex);
-      });
 
     actionsTd.appendChild(editBtn);
     actionsTd.appendChild(deleteBtn);
@@ -650,7 +486,6 @@ function renderSummary() {
 
   const lines = [];
   lines.push(`Price calculator: ${list.name}`);
-  lines.push(`Price calculator: ${list.name}`);
   if (!list.items.length) {
     lines.push("No items.");
   } else {
@@ -706,14 +541,6 @@ clearItemsBtn.addEventListener("click", async () => {
     confirmText: "Clear"
   });
   if (!ok) return;
-clearItemsBtn.addEventListener("click", async () => {
-  const list = getCurrentList();
-  if (!list) return;
-
-  const ok = await confirmDialog(`Clear all items from "${list.name}"?`, {
-    confirmText: "Clear"
-  });
-  if (!ok) return;
 
   list.items = [];
   saveState();
@@ -734,16 +561,6 @@ deleteListBtn.addEventListener("click", async () => {
       { confirmText: "Delete" }
     );
     if (!ok) return;
-deleteListBtn.addEventListener("click", async () => {
-  const list = getCurrentList();
-  if (!list) return;
-
-  if (shoppingLists.length === 1) {
-    const ok = await confirmDialog(
-      `"${list.name}" is your only list.\nIf you delete it, a new empty default list will be created.\n\nContinue?`,
-      { confirmText: "Delete" }
-    );
-    if (!ok) return;
 
     shoppingLists = [];
     const defaultList = {
@@ -753,11 +570,6 @@ deleteListBtn.addEventListener("click", async () => {
     };
     shoppingLists.push(defaultList);
     currentListId = defaultList.id;
-  } else {
-    const ok = await confirmDialog(`Delete the list "${list.name}" and all its items?`, {
-      confirmText: "Delete"
-    });
-    if (!ok) return;
   } else {
     const ok = await confirmDialog(`Delete the list "${list.name}" and all its items?`, {
       confirmText: "Delete"
@@ -888,23 +700,6 @@ importBtn.addEventListener("click", () => {
         list.items[existingIndex].price = newItem.price;
         list.items[existingIndex].category = newItem.category;
       } else {
-      const message =
-        `Item "${newItem.name}" already exists.\n\n` +
-        `Existing price: ${existing.price.toFixed(2)}\n` +
-        `Imported price: ${newItem.price.toFixed(2)}\n\n` +
-        `Merge = use imported price & category\n` +
-        `Keep both = add duplicate item`;
-
-      const merge = await confirmDialog(message, {
-        title: "Merge duplicate?",
-        confirmText: "Merge",
-        cancelText: "Keep both"
-      });
-
-      if (merge) {
-        list.items[existingIndex].price = newItem.price;
-        list.items[existingIndex].category = newItem.category;
-      } else {
         list.items.push(newItem);
       }
     }
@@ -975,121 +770,19 @@ generateSummaryBtn.addEventListener("click", () => {
   renderSummary();
   showMessage("info", "Summary generated.");
 });
-function toggleShareMenu(openExplicitly = null) {
-  if (!shareMenuOptions) return;
-  const shouldOpen = openExplicitly !== null ? openExplicitly : shareMenuOptions.hidden;
-  if (shouldOpen) {
-    renderShareCode();
-  }
-  shareMenuOptions.hidden = !shouldOpen;
-}
-
-refreshShareCodeBtn.addEventListener("click", event => {
-  event.stopPropagation();
-  toggleShareMenu();
-});
-
-document.addEventListener("click", event => {
-  if (!shareMenuOptions || !refreshShareCodeBtn) return;
-  const container = refreshShareCodeBtn.closest(".share-menu");
-  if (container && !container.contains(event.target)) {
-    toggleShareMenu(false);
-  }
-});
-
-shareMenuOptions?.addEventListener("click", async event => {
-  const target = event.target;
-  if (!(target instanceof HTMLElement)) return;
-  const action = target.dataset.shareAction;
-  if (!action) return;
-
-  const code = shareCodeTextarea.value.trim();
-  const list = getCurrentList();
-  const listName = list ? list.name : "list";
-  const shareText = `Price calculator list "${listName}": ${code}`;
-
-  if (action === "copy") {
-    try {
-      await navigator.clipboard.writeText(code);
-      showMessage("info", "Share code copied.");
-    } catch {
-      showMessage("error", "Could not copy to clipboard.");
-    }
-  } else if (action === "whatsapp") {
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-    window.open(url, "_blank");
-  } else if (action === "sms") {
-    const url = `sms:?body=${encodeURIComponent(shareText)}`;
-    window.open(url, "_self");
-  }
-
-  toggleShareMenu(false);
-});
-
-generateSummaryBtn.addEventListener("click", () => {
-  renderSummary();
-  showMessage("info", "Summary generated.");
-});
 
 splitPeopleInput.addEventListener("input", () => {
   updatePerPerson();
 });
 
 // ---------------- AUTO-COLLAPSE MENU ON MOBILE SCROLL ----------------
-// Only lock the menu open while text inputs are focused (not when tapping buttons)
+// Keep the menu visible while a top-bar input is focused (to avoid hiding under the keyboard).
 const topBarInputs = topBar?.querySelectorAll("input, select, textarea") || [];
-let menuLocked = false;
-let lastScrollY = window.scrollY;
 
-function updateMenuCollapse() {
-  if (!topBar) return;
-
-  const isMobile = window.matchMedia("(max-width: 767px)").matches;
-  if (!isMobile) {
-    topBar.classList.remove("menu-collapsed");
-    return;
-  }
-
-  if (menuLocked) {
-    topBar.classList.remove("menu-collapsed");
-    return;
-  }
-
-  const currentY = window.scrollY;
-  const scrollingDown = currentY > lastScrollY;
-  const atTop = currentY <= 1;
-
-  if (atTop) {
-    topBar.classList.remove("menu-collapsed");
-  } else if (scrollingDown) {
-    topBar.classList.add("menu-collapsed");
-  }
-
-  lastScrollY = currentY;
+function isTopBarFieldFocused() {
+  return Array.from(topBarInputs).some(el => el === document.activeElement);
 }
 
-topBarInputs.forEach(input => {
-  input.addEventListener("focus", () => {
-    menuLocked = true;
-    topBar?.classList.remove("menu-collapsed");
-  });
-
-  input.addEventListener("blur", () => {
-    const stillFocused = Array.from(topBarInputs).some(el => el === document.activeElement);
-    menuLocked = stillFocused;
-    if (!menuLocked) {
-      updateMenuCollapse();
-    }
-  });
-});
-
-window.addEventListener("scroll", updateMenuCollapse);
-window.addEventListener("resize", updateMenuCollapse);
-// ---------------- AUTO-COLLAPSE MENU ON MOBILE SCROLL ----------------
-// Only lock the menu open while text inputs are focused (not when tapping buttons)
-const topBarInputs = topBar?.querySelectorAll("input, select, textarea") || [];
-let menuLocked = false;
-
 function updateMenuCollapse() {
   if (!topBar) return;
 
@@ -1099,12 +792,13 @@ function updateMenuCollapse() {
     return;
   }
 
-  if (menuLocked) {
+  if (isTopBarFieldFocused()) {
     topBar.classList.remove("menu-collapsed");
     return;
   }
 
-  if (window.scrollY <= 1) {
+  const atTop = window.scrollY <= 0;
+  if (atTop) {
     topBar.classList.remove("menu-collapsed");
   } else {
     topBar.classList.add("menu-collapsed");
@@ -1113,28 +807,21 @@ function updateMenuCollapse() {
 
 topBarInputs.forEach(input => {
   input.addEventListener("focus", () => {
-    menuLocked = true;
     topBar?.classList.remove("menu-collapsed");
   });
 
   input.addEventListener("blur", () => {
-    const stillFocused = Array.from(topBarInputs).some(el => el === document.activeElement);
-    menuLocked = stillFocused;
-    if (!menuLocked) {
-      updateMenuCollapse();
-    }
+    updateMenuCollapse();
   });
 });
+
+window.addEventListener("scroll", updateMenuCollapse, { passive: true });
+window.addEventListener("resize", updateMenuCollapse);
 
 window.addEventListener("scroll", updateMenuCollapse);
 window.addEventListener("resize", updateMenuCollapse);
 
 // ---------------- INIT ----------------
-loadState();
-renderAll();
-updatePerPerson();
-updateMenuCollapse();
-showMessage("info", "Price calculator ready.");
 loadState();
 renderAll();
 updatePerPerson();
