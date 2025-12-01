@@ -776,7 +776,8 @@ splitPeopleInput.addEventListener("input", () => {
 });
 
 // ---------------- AUTO-COLLAPSE MENU ON MOBILE SCROLL ----------------
-const topBarInputs = topBar?.querySelectorAll("input, select, button, textarea") || [];
+// Only lock the menu open while text inputs are focused (not when tapping buttons)
+const topBarInputs = topBar?.querySelectorAll("input, select, textarea") || [];
 let menuLocked = false;
 
 function updateMenuCollapse() {
