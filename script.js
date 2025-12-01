@@ -154,6 +154,8 @@ const dialogTitle = document.getElementById("dialogTitle");
 const dialogContent = document.getElementById("dialogContent");
 const dialogCancel = document.getElementById("dialogCancel");
 const dialogConfirm = document.getElementById("dialogConfirm");
+const topBarMenu = document.querySelector(".top-bar-menu");
+const menuToggle = document.querySelector(".menu-toggle");
 
 async function openDialog({
   title = "",
@@ -938,6 +940,44 @@ splitPeopleInput.addEventListener("input", () => {
   updatePerPerson();
 });
 
+// ---------------- HAMBURGER MENU ----------------
+let mobileMenuOpen = false;
+
+function setMenuOpen(open) {
+  const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+
+  if (isDesktop) {
+    open = true;
+  } else {
+    mobileMenuOpen = open;
+  }
+
+  const menuVisible = isDesktop || open;
+
+  if (topBarMenu) {
+    topBarMenu.hidden = !menuVisible;
+  }
+
+  if (menuToggle) {
+    menuToggle.setAttribute("aria-expanded", String(menuVisible));
+  }
+
+  if (topBar) {
+    topBar.classList.toggle("menu-open", menuVisible);
+  }
+}
+
+function syncMenuForViewport() {
+  const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+  setMenuOpen(isDesktop ? true : mobileMenuOpen);
+}
+
+menuToggle?.addEventListener("click", () => {
+  setMenuOpen(!mobileMenuOpen);
+});
+
+syncMenuForViewport();
+
 // ---------------- AUTO-COLLAPSE MENU ON MOBILE SCROLL ----------------
 // Only lock the menu open while text inputs are focused (not when tapping buttons)
 const topBarInputs = topBar?.querySelectorAll("input, select, textarea") || [];
@@ -953,7 +993,7 @@ function updateMenuCollapse() {
     return;
   }
 
-  if (menuLocked) {
+  if (menuLocked || mobileMenuOpen) {
     topBar.classList.remove("menu-collapsed");
     return;
   }
@@ -988,8 +1028,14 @@ topBarInputs.forEach(input => {
   });
 });
 
+function handleResize() {
+  syncMenuForViewport();
+  updateMenuCollapse();
+}
+
 window.addEventListener("scroll", updateMenuCollapse);
-window.addEventListener("resize", updateMenuCollapse);
+window.addEventListener("resize", handleResize);
+
 // ---------------- INIT ----------------
 loadState();
 renderAll();
