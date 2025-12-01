@@ -783,31 +783,26 @@ function isTopBarFieldFocused() {
   return Array.from(topBarInputs).some(el => el === document.activeElement);
 }
 
-const mobileMedia = window.matchMedia("(max-width: 767px)");
-let menuCollapsed = false;
-
-function setMenuCollapsed(shouldCollapse) {
-  if (!topBar) return;
-  menuCollapsed = shouldCollapse;
-  topBar.classList.toggle("menu-collapsed", shouldCollapse);
-}
-
 function updateMenuCollapse() {
   if (!topBar) return;
 
-  const isMobile = mobileMedia.matches;
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
   if (!isMobile) {
-    setMenuCollapsed(false);
+    topBar.classList.remove("menu-collapsed");
     return;
   }
 
   if (isTopBarFieldFocused()) {
-    setMenuCollapsed(false);
+    topBar.classList.remove("menu-collapsed");
     return;
   }
 
-  const scrolled = (window.scrollY || document.documentElement.scrollTop || 0) > 0;
-  setMenuCollapsed(scrolled);
+  const atTop = window.scrollY <= 0;
+  if (atTop) {
+    topBar.classList.remove("menu-collapsed");
+  } else {
+    topBar.classList.add("menu-collapsed");
+  }
 }
 
 topBarInputs.forEach(input => {
@@ -822,7 +817,9 @@ topBarInputs.forEach(input => {
 
 window.addEventListener("scroll", updateMenuCollapse, { passive: true });
 window.addEventListener("resize", updateMenuCollapse);
-mobileMedia.addEventListener("change", updateMenuCollapse);
+
+window.addEventListener("scroll", updateMenuCollapse);
+window.addEventListener("resize", updateMenuCollapse);
 
 // ---------------- INIT ----------------
 loadState();
