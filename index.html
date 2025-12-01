@@ -7,7 +7,7 @@
   <!-- Pico.css from CDN -->
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 
-  <!-- Your own small overrides (can be empty) -->
+  <!-- Your own small overrides -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,8 +28,12 @@
           New list name
           <input type="text" id="newListName" placeholder="e.g. Party, Groceries">
         </label>
+      </div>
 
+      <div class="grid">
         <button id="createListBtn">Create List</button>
+        <button id="clearItemsBtn" class="secondary">Clear items</button>
+        <button id="deleteListBtn" class="secondary contrast">Delete current list</button>
       </div>
     </section>
 
@@ -60,6 +64,7 @@
           <tr>
             <th>Item</th>
             <th style="width: 120px;">Price</th>
+            <th style="width: 110px;">Actions</th>
           </tr>
         </thead>
         <tbody>
