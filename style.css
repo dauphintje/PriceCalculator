@@ -316,8 +316,9 @@ textarea {
   }
 
   .top-bar-main {
-    flex-direction: row;
-    align-items: center;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
     gap: 1rem;
   }
 
@@ -326,8 +327,16 @@ textarea {
   }
 
   .top-bar-primary-controls {
-    flex: 1;
     justify-content: flex-start;
+  }
+
+  .top-bar-extra {
+    margin-top: 0;
+    width: auto;
+  }
+
+  .top-bar-extra-inner {
+    justify-content: flex-end;
   }
 
   /* On desktop, never hide the extra row even if menu-collapsed class is present */
