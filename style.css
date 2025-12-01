@@ -20,7 +20,7 @@ body {
   padding-block: 0.5rem;
 }
 
-/* First row of the top bar */
+/* First row: logo + list selector */
 .top-bar-main {
   display: flex;
   flex-direction: column;
@@ -32,7 +32,6 @@ body {
   text-align: center;
 }
 
-/* Always-visible controls: list selector + toggle */
 .top-bar-primary-controls {
   display: flex;
   flex-wrap: wrap;
@@ -45,11 +44,7 @@ body {
   min-width: 150px;
 }
 
-#menuToggleBtn {
-  white-space: nowrap;
-}
-
-/* Collapsible extra controls */
+/* Extra row: new list + buttons */
 .top-bar-extra {
   margin-top: 0.5rem;
 }
@@ -69,7 +64,7 @@ body {
   white-space: nowrap;
 }
 
-/* When collapsed, hide extra row */
+/* When collapsed (on mobile scroll), hide extra row */
 .top-bar.menu-collapsed .top-bar-extra {
   display: none;
 }
@@ -122,5 +117,10 @@ textarea {
 
   .top-bar-primary-controls {
     justify-content: flex-end;
+  }
+
+  /* On desktop, never hide the extra row even if menu-collapsed class is present */
+  .top-bar.menu-collapsed .top-bar-extra {
+    display: block;
   }
 }
