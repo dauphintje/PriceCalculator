@@ -45,7 +45,6 @@ function showMessage(type, text) {
   area.innerHTML = "";
   area.appendChild(article);
 
-  // auto-clear after a few seconds
   setTimeout(() => {
     if (area.contains(article)) {
       area.removeChild(article);
@@ -56,8 +55,6 @@ function showMessage(type, text) {
 // ---------------- DATA MODEL ----------------
 let shoppingLists = [];
 let currentListId = null;
-let currentView = "items"; // default view
-let currentSearch = "none"; // not used but placeholder
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
@@ -79,7 +76,6 @@ function saveState() {
 }
 
 function loadState() {
-  // try localStorage first
   let json = loadLocal("shoppingLists") || getCookie("shoppingLists");
   const currentIdCookie = loadLocal("currentListId") || getCookie("currentListId");
 
@@ -150,37 +146,6 @@ const importBtn = document.getElementById("importBtn");
 
 const sortSelect = document.getElementById("sortSelect");
 const searchInput = document.getElementById("searchInput");
-
-const navButtons = document.querySelectorAll("[data-view-target]");
-const viewSections = document.querySelectorAll("section[data-view]");
-
-// ---------------- VIEWS ----------------
-function setView(viewName) {
-  currentView = viewName;
-  viewSections.forEach(section => {
-    const v = section.getAttribute("data-view");
-    if (v === viewName) {
-      section.classList.remove("view-hidden");
-    } else {
-      section.classList.add("view-hidden");
-    }
-  });
-
-  navButtons.forEach(btn => {
-    if (btn.getAttribute("data-view-target") === viewName) {
-      btn.classList.add("contrast");
-    } else {
-      btn.classList.remove("contrast");
-    }
-  });
-}
-
-navButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.getAttribute("data-view-target");
-    setView(target);
-  });
-});
 
 // ---------------- RENDER ----------------
 function renderListSelect() {
@@ -291,8 +256,7 @@ function renderItems() {
     return;
   }
 
-  itemsToShow.forEach((item, filteredIndex) => {
-    // We need the actual index in the original array to edit/delete correctly
+  itemsToShow.forEach(item => {
     const actualIndex = list.items.indexOf(item);
 
     const tr = document.createElement("tr");
@@ -426,7 +390,6 @@ createListBtn.addEventListener("click", () => {
   newListNameInput.value = "";
   saveState();
   renderAll();
-  setView("items");
   showMessage("info", `Created list "${name}".`);
 });
 
@@ -626,6 +589,5 @@ splitPeopleInput.addEventListener("input", () => {
 // ---------------- INIT ----------------
 loadState();
 renderAll();
-setView("items");
 updatePerPerson();
 showMessage("info", "Shopping lists loaded.");
