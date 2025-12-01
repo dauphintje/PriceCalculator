@@ -1,21 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>SimpleSync Interface</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <title>Shopping Lists</title>
+
+  <!-- Pico.css from CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+  <!-- Your own small overrides (can be empty) -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>SimpleSync Viewer</h1>
+  <main class="container">
 
-    <div id="output"><em>loading...</em></div>
+    <h1>Shopping Lists</h1>
 
-    <button id="syncBtn">Send cookies → Server</button>
-    <button id="sendCmdBtn">Send command to server</button>
+    <!-- List selection & creation -->
+    <section>
+      <h2>Lists</h2>
+      <div class="grid">
+        <label>
+          Current list
+          <select id="listSelect"></select>
+        </label>
 
-    <h2>Log</h2>
-    <div id="log"><em>loading log...</em></div>
+        <label>
+          New list name
+          <input type="text" id="newListName" placeholder="e.g. Party, Groceries">
+        </label>
 
-    <script src="script.js"></script>
+        <button id="createListBtn">Create List</button>
+      </div>
+    </section>
+
+    <!-- Add item to current list -->
+    <section>
+      <h2>Add Item</h2>
+      <form id="addItemForm">
+        <div class="grid">
+          <label>
+            Item name
+            <input type="text" id="itemName" required>
+          </label>
+
+          <label>
+            Price
+            <input type="number" id="itemPrice" step="0.01" min="0" required>
+          </label>
+        </div>
+        <button type="submit">Add to list</button>
+      </form>
+    </section>
+
+    <!-- Items table + total -->
+    <section>
+      <h2>Items</h2>
+      <table id="itemsTable">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th style="width: 120px;">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- JS fills rows here -->
+        </tbody>
+      </table>
+
+      <p><strong>Total:</strong> <span id="totalPrice">0.00</span></p>
+    </section>
+
+    <!-- Share / import codes -->
+    <section>
+      <h2>Share & Import</h2>
+
+      <article>
+        <h3>Share this list</h3>
+        <p>Copy this code and send it to a friend so they can import your list.</p>
+        <label>
+          Share code
+          <textarea id="shareCode" rows="3" readonly></textarea>
+        </label>
+        <button id="refreshShareCodeBtn">Refresh share code</button>
+      </article>
+
+      <article>
+        <h3>Import someone’s list</h3>
+        <p>Paste a share code below and merge into the current list.</p>
+        <label>
+          Import code
+          <textarea id="importCode" rows="3"></textarea>
+        </label>
+        <button id="importBtn">Import &amp; Merge</button>
+      </article>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
