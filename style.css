@@ -1,5 +1,5 @@
 /* Mobile-first: nav at bottom, slightly zoomed-in default.
-   Desktop: nav at top, slightly zoomed-out feel. */
+   Desktop: nav at top, slightly zoomed-out. */
 
 /* Ensure body doesn't hide under nav */
 body {
@@ -42,13 +42,13 @@ body {
 }
 
 /* Table tweaks */
-#itemsTable td:nth-child(2),
-#itemsTable th:nth-child(2) {
+#itemsTable td:nth-child(3),
+#itemsTable th:nth-child(3) {
   text-align: right;
 }
 
-#itemsTable td:nth-child(3),
-#itemsTable th:nth-child(3) {
+#itemsTable td:nth-child(4),
+#itemsTable th:nth-child(4) {
   text-align: center;
 }
 
@@ -61,11 +61,16 @@ textarea {
   display: none;
 }
 
+/* Messages */
+#messageArea article {
+  margin-bottom: 1rem;
+}
+
 /* Desktop / larger screens */
 @media (min-width: 768px) {
   /* nav at top, more “zoomed out” */
   html {
-    font-size: 15px; /* slightly smaller than default */
+    font-size: 15px; /* slightly smaller than default for zoomed-out feel */
   }
 
   .nav-bar {
