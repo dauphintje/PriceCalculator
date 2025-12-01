@@ -7,16 +7,25 @@
   <!-- Pico.css from CDN -->
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 
-  <!-- Your own small overrides -->
+  <!-- Your overrides -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="container">
 
+  <!-- Main navigation (bottom on mobile, top on desktop via CSS) -->
+  <nav id="mainNav" class="nav-bar">
+    <ul>
+      <li><button type="button" data-view-target="lists" class="contrast">Lists</button></li>
+      <li><button type="button" data-view-target="items">Items</button></li>
+      <li><button type="button" data-view-target="share">Share</button></li>
+    </ul>
+  </nav>
+
+  <main class="container app-main">
     <h1>Shopping Lists</h1>
 
-    <!-- List selection & creation -->
-    <section>
+    <!-- LISTS VIEW -->
+    <section data-view="lists">
       <h2>Lists</h2>
       <div class="grid">
         <label>
@@ -37,9 +46,11 @@
       </div>
     </section>
 
-    <!-- Add item to current list -->
-    <section>
-      <h2>Add Item</h2>
+    <!-- ITEMS VIEW -->
+    <section data-view="items">
+      <h2>Items</h2>
+
+      <!-- Add item -->
       <form id="addItemForm">
         <div class="grid">
           <label>
@@ -54,30 +65,46 @@
         </div>
         <button type="submit">Add to list</button>
       </form>
-    </section>
 
-    <!-- Items table + total -->
-    <section>
-      <h2>Items</h2>
+      <!-- Table & tools -->
+      <div class="toolbar">
+        <small>Tap/click the buttons to manage items.</small>
+        <div class="grid">
+          <button type="button" id="sortByNameBtn" class="secondary">Sort by name</button>
+          <button type="button" id="sortByPriceBtn" class="secondary">Sort by price</button>
+        </div>
+      </div>
+
       <table id="itemsTable">
         <thead>
           <tr>
             <th>Item</th>
-            <th style="width: 120px;">Price</th>
-            <th style="width: 110px;">Actions</th>
+            <th style="width: 110px;">Price</th>
+            <th style="width: 140px;">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <!-- JS fills rows here -->
+          <!-- JS adds rows here -->
         </tbody>
       </table>
 
       <p><strong>Total:</strong> <span id="totalPrice">0.00</span></p>
+
+      <div class="grid">
+        <label>
+          Number of people
+          <input type="number" id="splitPeople" min="1" value="1">
+        </label>
+        <label>
+          Per person
+          <input type="text" id="perPerson" readonly>
+        </label>
+      </div>
     </section>
 
-    <!-- Share / import codes -->
-    <section>
-      <h2>Share & Import</h2>
+    <!-- SHARE VIEW -->
+    <section data-view="share">
+      <h2>Share &amp; Import</h2>
 
       <article>
         <h3>Share this list</h3>
@@ -87,6 +114,14 @@
           <textarea id="shareCode" rows="3" readonly></textarea>
         </label>
         <button id="refreshShareCodeBtn">Refresh share code</button>
+
+        <h4>Text summary</h4>
+        <p>Generate a simple text summary you can paste anywhere.</p>
+        <button id="generateSummaryBtn" class="secondary">Generate summary</button>
+        <label>
+          Summary
+          <textarea id="summaryText" rows="4" readonly></textarea>
+        </label>
       </article>
 
       <article>
@@ -99,7 +134,6 @@
         <button id="importBtn">Import &amp; Merge</button>
       </article>
     </section>
-
   </main>
 
   <script src="script.js"></script>
