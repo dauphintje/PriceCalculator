@@ -818,6 +818,9 @@ topBarInputs.forEach(input => {
 window.addEventListener("scroll", updateMenuCollapse, { passive: true });
 window.addEventListener("resize", updateMenuCollapse);
 
+window.addEventListener("scroll", updateMenuCollapse);
+window.addEventListener("resize", updateMenuCollapse);
+
 // ---------------- INIT ----------------
 loadState();
 renderAll();
