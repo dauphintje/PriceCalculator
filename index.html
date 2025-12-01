@@ -24,6 +24,9 @@
   <main class="container app-main">
     <h1>Shopping Lists</h1>
 
+    <!-- Info / error messages -->
+    <section id="messageArea" aria-live="polite"></section>
+
     <!-- LISTS VIEW -->
     <section data-view="lists">
       <h2>Lists</h2>
@@ -59,26 +62,43 @@
           </label>
 
           <label>
+            Category
+            <input type="text" id="itemCategory" placeholder="e.g. Food, Drinks">
+          </label>
+        </div>
+        <div class="grid">
+          <label>
             Price
             <input type="number" id="itemPrice" step="0.01" min="0" required>
           </label>
+          <button type="submit">Add to list</button>
         </div>
-        <button type="submit">Add to list</button>
       </form>
 
-      <!-- Table & tools -->
+      <!-- Tools -->
       <div class="toolbar">
-        <small>Tap/click the buttons to manage items.</small>
         <div class="grid">
-          <button type="button" id="sortByNameBtn" class="secondary">Sort by name</button>
-          <button type="button" id="sortByPriceBtn" class="secondary">Sort by price</button>
+          <label>
+            Search (name or category)
+            <input type="search" id="searchInput" placeholder="e.g. milk, snacks">
+          </label>
+          <label>
+            Sort
+            <select id="sortSelect">
+              <option value="none">None</option>
+              <option value="name">By name</option>
+              <option value="price">By price</option>
+            </select>
+          </label>
         </div>
       </div>
 
+      <!-- Table -->
       <table id="itemsTable">
         <thead>
           <tr>
             <th>Item</th>
+            <th>Category</th>
             <th style="width: 110px;">Price</th>
             <th style="width: 140px;">Actions</th>
           </tr>
