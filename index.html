@@ -14,7 +14,7 @@
   <!-- Optional: provide icon.png (180x180) next to index.html -->
   <link rel="apple-touch-icon" href="icon.png">
 
-  <!-- PWA manifest (Android + modern browsers) -->
+  <!-- PWA manifest (optional, for Android / Chrome) -->
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0f172a">
 
@@ -27,7 +27,7 @@
 <body>
   <header class="top-bar">
     <div class="container top-bar-inner">
-      <!-- Top row: logo + list dropdown + menu toggle -->
+      <!-- Top row: logo + list dropdown (always visible) -->
       <div class="top-bar-main">
         <h1>Shopping Lists</h1>
 
@@ -36,14 +36,10 @@
             List
             <select id="listSelect"></select>
           </label>
-
-          <button id="menuToggleBtn" type="button" class="secondary">
-            More
-          </button>
         </div>
       </div>
 
-      <!-- Collapsible row: new list + buttons -->
+      <!-- Extra row: new list + buttons (auto hides on scroll on mobile) -->
       <div class="top-bar-extra" id="topBarExtra">
         <div class="top-bar-extra-inner">
           <label>
