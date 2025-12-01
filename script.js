@@ -1,4 +1,4 @@
-// ---------------- COOKIE HELPERS ----------------
+// ---------------- UTILITIES ----------------
 function setCookie(name, value, days = 365) {
   const d = new Date();
   d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
@@ -14,9 +14,50 @@ function getCookie(name) {
   return null;
 }
 
+function saveLocal(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
+function loadLocal(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function showMessage(type, text) {
+  // type: "info" | "error"
+  const area = document.getElementById("messageArea");
+  if (!area) return;
+
+  const article = document.createElement("article");
+  article.setAttribute("role", "status");
+  if (type === "error") {
+    article.setAttribute("data-theme", "danger");
+  }
+
+  article.textContent = text;
+  area.innerHTML = "";
+  area.appendChild(article);
+
+  // auto-clear after a few seconds
+  setTimeout(() => {
+    if (area.contains(article)) {
+      area.removeChild(article);
+    }
+  }, 4000);
+}
+
 // ---------------- DATA MODEL ----------------
 let shoppingLists = [];
 let currentListId = null;
+let currentView = "items"; // default view
+let currentSearch = "none"; // not used but placeholder
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
@@ -26,15 +67,21 @@ function getCurrentList() {
   return shoppingLists.find(l => l.id === currentListId) || null;
 }
 
-function saveToCookies() {
-  setCookie("shoppingLists", JSON.stringify(shoppingLists));
-  if (currentListId) setCookie("currentListId", currentListId);
+function saveState() {
+  const json = JSON.stringify(shoppingLists);
+  setCookie("shoppingLists", json);
+  saveLocal("shoppingLists", json);
+
+  if (currentListId) {
+    setCookie("currentListId", currentListId);
+    saveLocal("currentListId", currentListId);
+  }
 }
 
-// ---------------- LOAD FROM COOKIES ----------------
-function loadFromCookies() {
-  const json = getCookie("shoppingLists");
-  const currentIdCookie = getCookie("currentListId");
+function loadState() {
+  // try localStorage first
+  let json = loadLocal("shoppingLists") || getCookie("shoppingLists");
+  const currentIdCookie = loadLocal("currentListId") || getCookie("currentListId");
 
   if (json) {
     try {
@@ -46,12 +93,17 @@ function loadFromCookies() {
           items: Array.isArray(l.items)
             ? l.items
                 .filter(it => it && typeof it.name === "string" && typeof it.price === "number")
-                .map(it => ({ name: it.name, price: it.price }))
+                .map(it => ({
+                  name: it.name,
+                  price: it.price,
+                  category: typeof it.category === "string" ? it.category : ""
+                }))
             : []
         }));
       }
     } catch {
-      // ignore bad cookie
+      showMessage("error", "Saved data was corrupted. Starting fresh.");
+      shoppingLists = [];
     }
   }
 
@@ -79,6 +131,7 @@ const deleteListBtn = document.getElementById("deleteListBtn");
 
 const addItemForm = document.getElementById("addItemForm");
 const itemNameInput = document.getElementById("itemName");
+const itemCategoryInput = document.getElementById("itemCategory");
 const itemPriceInput = document.getElementById("itemPrice");
 const itemsTableBody = document.querySelector("#itemsTable tbody");
 const totalPriceSpan = document.getElementById("totalPrice");
@@ -95,16 +148,13 @@ const generateSummaryBtn = document.getElementById("generateSummaryBtn");
 const importCodeTextarea = document.getElementById("importCode");
 const importBtn = document.getElementById("importBtn");
 
-const sortByNameBtn = document.getElementById("sortByNameBtn");
-const sortByPriceBtn = document.getElementById("sortByPriceBtn");
+const sortSelect = document.getElementById("sortSelect");
+const searchInput = document.getElementById("searchInput");
 
-// View navigation
 const navButtons = document.querySelectorAll("[data-view-target]");
 const viewSections = document.querySelectorAll("section[data-view]");
 
-let currentView = "items"; // default view
-
-// ---------------- VIEW HANDLING ----------------
+// ---------------- VIEWS ----------------
 function setView(viewName) {
   currentView = viewName;
   viewSections.forEach(section => {
@@ -132,7 +182,7 @@ navButtons.forEach(btn => {
   });
 });
 
-// ---------------- RENDER FUNCTIONS ----------------
+// ---------------- RENDER ----------------
 function renderListSelect() {
   listSelect.innerHTML = "";
   shoppingLists.forEach(list => {
@@ -150,11 +200,76 @@ function deleteItemAtIndex(index) {
   if (index < 0 || index >= list.items.length) return;
 
   list.items.splice(index, 1);
-  saveToCookies();
+  saveState();
   renderItems();
   renderTotal();
   renderShareCode();
   updatePerPerson();
+  showMessage("info", "Item deleted.");
+}
+
+function editItem(index) {
+  const list = getCurrentList();
+  if (!list) return;
+  const item = list.items[index];
+  if (!item) return;
+
+  const newName = prompt("Edit item name:", item.name);
+  if (newName === null) return; // cancelled
+  const trimmedName = newName.trim();
+  if (!trimmedName) {
+    showMessage("error", "Name cannot be empty.");
+    return;
+  }
+
+  const newCategory = prompt("Edit category:", item.category || "");
+  if (newCategory === null) return;
+
+  const priceStr = prompt("Edit item price:", item.price.toFixed(2));
+  if (priceStr === null) return;
+
+  const price = parseFloat(priceStr);
+  if (isNaN(price) || price < 0) {
+    showMessage("error", "Please enter a valid non-negative price.");
+    return;
+  }
+
+  list.items[index] = {
+    name: trimmedName,
+    category: newCategory.trim(),
+    price
+  };
+
+  saveState();
+  renderItems();
+  renderTotal();
+  renderShareCode();
+  updatePerPerson();
+  showMessage("info", "Item updated.");
+}
+
+function applySortAndFilter(items) {
+  let filtered = [...items];
+
+  const q = searchInput.value.trim().toLowerCase();
+  if (q) {
+    filtered = filtered.filter(item => {
+      const nameMatch = item.name.toLowerCase().includes(q);
+      const catMatch = (item.category || "").toLowerCase().includes(q);
+      return nameMatch || catMatch;
+    });
+  }
+
+  const sortMode = sortSelect.value;
+  if (sortMode === "name") {
+    filtered.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
+  } else if (sortMode === "price") {
+    filtered.sort((a, b) => a.price - b.price);
+  }
+
+  return filtered;
 }
 
 function renderItems() {
@@ -163,11 +278,30 @@ function renderItems() {
 
   itemsTableBody.innerHTML = "";
 
-  list.items.forEach((item, index) => {
+  const itemsToShow = applySortAndFilter(list.items);
+
+  if (!itemsToShow.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 4;
+    td.textContent = "No items to show.";
+    td.style.textAlign = "center";
+    tr.appendChild(td);
+    itemsTableBody.appendChild(tr);
+    return;
+  }
+
+  itemsToShow.forEach((item, filteredIndex) => {
+    // We need the actual index in the original array to edit/delete correctly
+    const actualIndex = list.items.indexOf(item);
+
     const tr = document.createElement("tr");
 
     const nameTd = document.createElement("td");
     nameTd.textContent = item.name;
+
+    const catTd = document.createElement("td");
+    catTd.textContent = item.category || "";
 
     const priceTd = document.createElement("td");
     priceTd.textContent = item.price.toFixed(2);
@@ -180,7 +314,7 @@ function renderItems() {
     editBtn.textContent = "Edit";
     editBtn.className = "secondary";
     editBtn.addEventListener("click", () => {
-      editItem(index);
+      editItem(actualIndex);
     });
 
     // Delete button
@@ -191,13 +325,14 @@ function renderItems() {
     deleteBtn.style.marginLeft = "0.25rem";
     deleteBtn.addEventListener("click", () => {
       const ok = confirm(`Delete "${item.name}" from this list?`);
-      if (ok) deleteItemAtIndex(index);
+      if (ok) deleteItemAtIndex(actualIndex);
     });
 
     actionsTd.appendChild(editBtn);
     actionsTd.appendChild(deleteBtn);
 
     tr.appendChild(nameTd);
+    tr.appendChild(catTd);
     tr.appendChild(priceTd);
     tr.appendChild(actionsTd);
     itemsTableBody.appendChild(tr);
@@ -258,7 +393,8 @@ function renderSummary() {
     lines.push("No items.");
   } else {
     list.items.forEach(item => {
-      lines.push(`- ${item.name}: ${item.price.toFixed(2)}`);
+      const cat = item.category ? ` (${item.category})` : "";
+      lines.push(`- ${item.name}${cat}: ${item.price.toFixed(2)}`);
     });
     const total = list.items.reduce((sum, item) => sum + item.price, 0);
     lines.push("");
@@ -288,15 +424,17 @@ createListBtn.addEventListener("click", () => {
   currentListId = newList.id;
 
   newListNameInput.value = "";
-  saveToCookies();
+  saveState();
   renderAll();
   setView("items");
+  showMessage("info", `Created list "${name}".`);
 });
 
 listSelect.addEventListener("change", () => {
   currentListId = listSelect.value;
-  saveToCookies();
+  saveState();
   renderAll();
+  showMessage("info", "Switched list.");
 });
 
 clearItemsBtn.addEventListener("click", () => {
@@ -307,11 +445,12 @@ clearItemsBtn.addEventListener("click", () => {
   if (!ok) return;
 
   list.items = [];
-  saveToCookies();
+  saveState();
   renderItems();
   renderTotal();
   renderShareCode();
   updatePerPerson();
+  showMessage("info", "All items cleared.");
 });
 
 deleteListBtn.addEventListener("click", () => {
@@ -340,93 +479,56 @@ deleteListBtn.addEventListener("click", () => {
     currentListId = shoppingLists[0].id;
   }
 
-  saveToCookies();
+  saveState();
   renderAll();
+  showMessage("info", "List deleted.");
 });
 
-// ---------------- ADD & EDIT ITEMS ----------------
+// ---------------- ADD ITEM ----------------
 addItemForm.addEventListener("submit", event => {
-  event.preventDefault(); // IMPORTANT: prevents page reload
+  event.preventDefault();
 
   const list = getCurrentList();
-  if (!list) return;
+  if (!list) {
+    showMessage("error", "No list selected.");
+    return;
+  }
 
   const name = itemNameInput.value.trim();
+  const category = itemCategoryInput.value.trim();
   const priceStr = itemPriceInput.value.trim();
 
   if (!name || !priceStr) {
-    alert("Please fill in both name and price.");
+    showMessage("error", "Please fill in at least name and price.");
     return;
   }
 
   const price = parseFloat(priceStr);
   if (isNaN(price) || price < 0) {
-    alert("Please enter a valid non-negative price.");
+    showMessage("error", "Please enter a valid non-negative price.");
     return;
   }
 
-  list.items.push({ name, price });
+  list.items.push({ name, category, price });
 
   itemNameInput.value = "";
+  itemCategoryInput.value = "";
   itemPriceInput.value = "";
 
-  saveToCookies();
+  saveState();
   renderItems();
   renderTotal();
   renderShareCode();
   updatePerPerson();
+  showMessage("info", "Item added.");
 });
 
-function editItem(index) {
-  const list = getCurrentList();
-  if (!list) return;
-  const item = list.items[index];
-  if (!item) return;
-
-  const newName = prompt("Edit item name:", item.name);
-  if (newName === null) return; // cancelled
-
-  const trimmedName = newName.trim();
-  if (!trimmedName) {
-    alert("Name cannot be empty.");
-    return;
-  }
-
-  const priceStr = prompt("Edit item price:", item.price.toFixed(2));
-  if (priceStr === null) return;
-
-  const price = parseFloat(priceStr);
-  if (isNaN(price) || price < 0) {
-    alert("Please enter a valid non-negative price.");
-    return;
-  }
-
-  list.items[index] = { name: trimmedName, price };
-  saveToCookies();
-  renderItems();
-  renderTotal();
-  renderShareCode();
-  updatePerPerson();
-}
-
-// ---------------- SORTING ----------------
-sortByNameBtn.addEventListener("click", () => {
-  const list = getCurrentList();
-  if (!list) return;
-
-  list.items.sort((a, b) =>
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-  );
-  saveToCookies();
+// ---------------- SORT & SEARCH ----------------
+sortSelect.addEventListener("change", () => {
   renderItems();
 });
 
-sortByPriceBtn.addEventListener("click", () => {
-  const list = getCurrentList();
-  if (!list) return;
-
-  list.items.sort((a, b) => a.price - b.price);
-  saveToCookies();
+searchInput.addEventListener("input", () => {
   renderItems();
 });
 
@@ -434,13 +536,13 @@ sortByPriceBtn.addEventListener("click", () => {
 importBtn.addEventListener("click", () => {
   const list = getCurrentList();
   if (!list) {
-    alert("No current list selected.");
+    showMessage("error", "No current list selected.");
     return;
   }
 
   const code = importCodeTextarea.value.trim();
   if (!code) {
-    alert("Please paste a code to import.");
+    showMessage("error", "Please paste a code to import.");
     return;
   }
 
@@ -449,21 +551,25 @@ importBtn.addEventListener("click", () => {
     const json = decodeURIComponent(atob(code));
     imported = JSON.parse(json);
   } catch {
-    alert("Invalid code format.");
+    showMessage("error", "Invalid code format.");
     return;
   }
 
   if (!imported || !Array.isArray(imported.items)) {
-    alert("This code does not contain a valid list.");
+    showMessage("error", "This code does not contain a valid list.");
     return;
   }
 
   const importedItems = imported.items
     .filter(it => typeof it.name === "string" && typeof it.price === "number")
-    .map(it => ({ name: it.name, price: it.price }));
+    .map(it => ({
+      name: it.name,
+      price: it.price,
+      category: typeof it.category === "string" ? it.category : ""
+    }));
 
   if (!importedItems.length) {
-    alert("The imported list has no valid items.");
+    showMessage("error", "The imported list has no valid items.");
     return;
   }
 
@@ -480,11 +586,12 @@ importBtn.addEventListener("click", () => {
         `Item "${newItem.name}" already exists.\n\n` +
         `Existing price: ${existing.price.toFixed(2)}\n` +
         `Imported price: ${newItem.price.toFixed(2)}\n\n` +
-        `OK = Merge (use imported price)\n` +
+        `OK = Merge (use imported price & category)\n` +
         `Cancel = Keep both (add duplicate item)`;
 
       if (confirm(message)) {
         list.items[existingIndex].price = newItem.price;
+        list.items[existingIndex].category = newItem.category;
       } else {
         list.items.push(newItem);
       }
@@ -492,20 +599,23 @@ importBtn.addEventListener("click", () => {
   });
 
   importCodeTextarea.value = "";
-  saveToCookies();
+  saveState();
   renderItems();
   renderTotal();
   renderShareCode();
   updatePerPerson();
+  showMessage("info", "List imported and merged.");
 });
 
 // ---------------- SHARE & SUMMARY ----------------
 refreshShareCodeBtn.addEventListener("click", () => {
   renderShareCode();
+  showMessage("info", "Share code refreshed.");
 });
 
 generateSummaryBtn.addEventListener("click", () => {
   renderSummary();
+  showMessage("info", "Summary generated.");
 });
 
 // per-person changes
@@ -514,7 +624,8 @@ splitPeopleInput.addEventListener("input", () => {
 });
 
 // ---------------- INIT ----------------
-loadFromCookies();
+loadState();
 renderAll();
-setView("items"); // start on items view
+setView("items");
 updatePerPerson();
+showMessage("info", "Shopping lists loaded.");
