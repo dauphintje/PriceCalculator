@@ -1,44 +1,47 @@
-/* Mobile-first: nav at bottom, slightly zoomed-in default.
-   Desktop: nav at top, slightly zoomed-out. */
-
-/* Ensure body doesn't hide under nav */
+/* General layout */
 body {
   margin: 0;
 }
 
-/* Main nav bar */
-.nav-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0; /* mobile: bottom */
-  padding: 0.4rem 1rem;
+/* Top bar / menu */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   background: var(--pico-background-color);
-  border-top: 1px solid var(--pico-muted-border-color);
-  z-index: 100;
+  border-bottom: 1px solid var(--pico-muted-border-color);
 }
 
-.nav-bar ul {
+.top-bar-inner {
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  list-style: none;
-  padding: 0;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-block: 0.75rem;
+}
+
+.top-bar-inner h1 {
   margin: 0;
+  text-align: center;
 }
 
-.nav-bar li {
-  margin: 0;
+.top-bar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.nav-bar button {
-  width: 100%;
+.top-bar-controls label {
+  min-width: 140px;
 }
 
-/* Main content: keep space for nav */
+.top-bar-controls button {
+  white-space: nowrap;
+}
+
+/* Main content spacing */
 .app-main {
-  padding-top: 1rem;
-  padding-bottom: 4rem; /* space for bottom nav */
+  padding-block: 1rem 2rem;
 }
 
 /* Table tweaks */
@@ -56,11 +59,6 @@ textarea {
   resize: vertical;
 }
 
-/* Simple hidden class for views */
-.view-hidden {
-  display: none;
-}
-
 /* Messages */
 #messageArea article {
   margin-bottom: 1rem;
@@ -68,33 +66,21 @@ textarea {
 
 /* Desktop / larger screens */
 @media (min-width: 768px) {
-  /* nav at top, more “zoomed out” */
   html {
-    font-size: 15px; /* slightly smaller than default for zoomed-out feel */
+    font-size: 15px; /* slightly smaller for a zoomed-out feel */
   }
 
-  .nav-bar {
-    top: 0;
-    bottom: auto;
-    border-top: none;
-    border-bottom: 1px solid var(--pico-muted-border-color);
+  .top-bar-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .app-main {
-    padding-top: 4rem;   /* space for top nav */
-    padding-bottom: 2rem;
+  .top-bar-inner h1 {
+    text-align: left;
   }
 
-  .nav-bar ul {
-    justify-content: flex-start;
-    gap: 0.5rem;
-  }
-
-  .nav-bar li {
-    width: auto;
-  }
-
-  .nav-bar button {
-    width: auto;
+  .top-bar-controls {
+    justify-content: flex-end;
   }
 }
