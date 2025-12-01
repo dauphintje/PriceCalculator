@@ -159,13 +159,13 @@ body {
 }
 
 /* Table tweaks */
-#itemsTable td:nth-child(3),
-#itemsTable th:nth-child(3) {
+#itemsTable td:nth-child(2),
+#itemsTable th:nth-child(2) {
   text-align: right;
 }
 
-#itemsTable td:nth-child(4),
-#itemsTable th:nth-child(4) {
+#itemsTable td:nth-child(3),
+#itemsTable th:nth-child(3) {
   text-align: center;
 }
 

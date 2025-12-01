@@ -91,8 +91,7 @@ function loadState() {
                 .filter(it => it && typeof it.name === "string" && typeof it.price === "number")
                 .map(it => ({
                   name: it.name,
-                  price: it.price,
-                  category: typeof it.category === "string" ? it.category : ""
+                  price: it.price
                 }))
             : []
         }));
@@ -127,7 +126,6 @@ const deleteListBtn = document.getElementById("deleteListBtn");
 
 const addItemForm = document.getElementById("addItemForm");
 const itemNameInput = document.getElementById("itemName");
-const itemCategoryInput = document.getElementById("itemCategory");
 const itemPriceInput = document.getElementById("itemPrice");
 const itemsTableBody = document.querySelector("#itemsTable tbody");
 const totalPriceSpan = document.getElementById("totalPrice");
@@ -252,74 +250,6 @@ async function promptItemDetails(existingItem) {
   nameInput.required = true;
   nameLabel.appendChild(nameInput);
 
-  const categoryLabel = document.createElement("label");
-  categoryLabel.textContent = "Category";
-  const categoryInput = document.createElement("input");
-  categoryInput.type = "text";
-  categoryInput.value = existingItem.category || "";
-  categoryLabel.appendChild(categoryInput);
-
-const priceLabel = document.createElement("label");
-  priceLabel.textContent = "Price";
-  const priceInput = document.createElement("input");
-  priceInput.type = "number";
-  priceInput.step = "0.01";
-  priceInput.min = "0";
-  priceInput.value = existingItem.price.toFixed(2);
-  priceLabel.appendChild(priceInput);
-
-  form.appendChild(nameLabel);
-  form.appendChild(categoryLabel);
-  form.appendChild(priceLabel);
-
-  const confirmed = await openDialog({
-    title: "Edit item",
-    contentNode: form,
-    confirmText: "Save",
-    cancelText: "Cancel",
-    focusElement: nameInput
-  });
-
-  if (!confirmed) return null;
-
-  const trimmedName = nameInput.value.trim();
-  const trimmedCategory = categoryInput.value.trim();
-  const priceValue = parseFloat(priceInput.value.trim());
-
-  if (!trimmedName) {
-    showMessage("error", "Name cannot be empty.");
-    return null;
-  }
-
-  if (isNaN(priceValue) || priceValue < 0) {
-    showMessage("error", "Please enter a valid non-negative price.");
-    return null;
-  }
-
-  return {
-    name: trimmedName,
-    category: trimmedCategory,
-    price: priceValue
-  };
-}
-
-async function promptItemDetails(existingItem) {
-  const form = document.createElement("form");
-  const nameLabel = document.createElement("label");
-  nameLabel.textContent = "Item name";
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.value = existingItem.name;
-  nameInput.required = true;
-  nameLabel.appendChild(nameInput);
-
-  const categoryLabel = document.createElement("label");
-  categoryLabel.textContent = "Category";
-  const categoryInput = document.createElement("input");
-  categoryInput.type = "text";
-  categoryInput.value = existingItem.category || "";
-  categoryLabel.appendChild(categoryInput);
-
   const priceLabel = document.createElement("label");
   priceLabel.textContent = "Price";
   const priceInput = document.createElement("input");
@@ -330,7 +260,6 @@ async function promptItemDetails(existingItem) {
   priceLabel.appendChild(priceInput);
 
   form.appendChild(nameLabel);
-  form.appendChild(categoryLabel);
   form.appendChild(priceLabel);
 
   const confirmed = await openDialog({
@@ -344,7 +273,6 @@ async function promptItemDetails(existingItem) {
   if (!confirmed) return null;
 
   const trimmedName = nameInput.value.trim();
-  const trimmedCategory = categoryInput.value.trim();
   const priceValue = parseFloat(priceInput.value.trim());
 
   if (!trimmedName) {
@@ -359,7 +287,6 @@ async function promptItemDetails(existingItem) {
 
   return {
     name: trimmedName,
-    category: trimmedCategory,
     price: priceValue
   };
 }
@@ -414,11 +341,7 @@ function applySortAndFilter(items) {
 
   const q = searchInput.value.trim().toLowerCase();
   if (q) {
-    filtered = filtered.filter(item => {
-      const nameMatch = item.name.toLowerCase().includes(q);
-      const catMatch = (item.category || "").toLowerCase().includes(q);
-      return nameMatch || catMatch;
-    });
+    filtered = filtered.filter(item => item.name.toLowerCase().includes(q));
   }
 
   const sortMode = sortSelect.value;
@@ -444,7 +367,7 @@ function renderItems() {
   if (!itemsToShow.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 4;
+    td.colSpan = 3;
     td.textContent = "No items to show.";
     td.style.textAlign = "center";
     tr.appendChild(td);
@@ -459,9 +382,6 @@ function renderItems() {
 
     const nameTd = document.createElement("td");
     nameTd.textContent = item.name;
-
-    const catTd = document.createElement("td");
-    catTd.textContent = item.category || "";
 
     const priceTd = document.createElement("td");
     priceTd.textContent = item.price.toFixed(2);
@@ -498,7 +418,6 @@ function renderItems() {
     actionsTd.appendChild(deleteBtn);
 
     tr.appendChild(nameTd);
-    tr.appendChild(catTd);
     tr.appendChild(priceTd);
     tr.appendChild(actionsTd);
     itemsTableBody.appendChild(tr);
@@ -555,13 +474,11 @@ function renderSummary() {
 
   const lines = [];
   lines.push(`Price calculator: ${list.name}`);
-  lines.push(`Price calculator: ${list.name}`);
   if (!list.items.length) {
     lines.push("No items.");
   } else {
     list.items.forEach(item => {
-      const cat = item.category ? ` (${item.category})` : "";
-      lines.push(`- ${item.name}${cat}: ${item.price.toFixed(2)}`);
+      lines.push(`- ${item.name}: ${item.price.toFixed(2)}`);
     });
     const total = list.items.reduce((sum, item) => sum + item.price, 0);
     lines.push("");
@@ -666,7 +583,6 @@ addItemForm.addEventListener("submit", event => {
   }
 
   const name = itemNameInput.value.trim();
-  const category = itemCategoryInput.value.trim();
   const priceStr = itemPriceInput.value.trim();
 
   if (!name || !priceStr) {
@@ -680,10 +596,9 @@ addItemForm.addEventListener("submit", event => {
     return;
   }
 
-  list.items.push({ name, category, price });
+  list.items.push({ name, price });
 
   itemNameInput.value = "";
-  itemCategoryInput.value = "";
   itemPriceInput.value = "";
 
   saveState();
@@ -735,8 +650,7 @@ importBtn.addEventListener("click", async () => {
     .filter(it => typeof it.name === "string" && typeof it.price === "number")
     .map(it => ({
       name: it.name,
-      price: it.price,
-      category: typeof it.category === "string" ? it.category : ""
+      price: it.price
     }));
 
   if (!importedItems.length) {
@@ -759,7 +673,7 @@ importBtn.addEventListener("click", async () => {
         `Item "${newItem.name}" already exists.\n\n` +
         `Existing price: ${existing.price.toFixed(2)}\n` +
         `Imported price: ${newItem.price.toFixed(2)}\n\n` +
-        `Merge = use imported price & category\n` +
+        `Merge = use imported price\n` +
         `Keep both = add duplicate item`;
 
       const merge = await confirmDialog(message, {
@@ -770,7 +684,6 @@ importBtn.addEventListener("click", async () => {
 
       if (merge) {
         list.items[existingIndex].price = newItem.price;
-        list.items[existingIndex].category = newItem.category;
       } else {
         list.items.push(newItem);
       }
@@ -786,61 +699,6 @@ importBtn.addEventListener("click", async () => {
 });
 
 // ---------------- SHARE & SUMMARY ----------------
-function toggleShareMenu(openExplicitly = null) {
-  if (!shareMenuOptions) return;
-  const shouldOpen = openExplicitly !== null ? openExplicitly : shareMenuOptions.hidden;
-  if (shouldOpen) {
-    renderShareCode();
-  }
-  shareMenuOptions.hidden = !shouldOpen;
-}
-
-refreshShareCodeBtn.addEventListener("click", event => {
-  event.stopPropagation();
-  toggleShareMenu();
-});
-
-document.addEventListener("click", event => {
-  if (!shareMenuOptions || !refreshShareCodeBtn) return;
-  const container = refreshShareCodeBtn.closest(".share-menu");
-  if (container && !container.contains(event.target)) {
-    toggleShareMenu(false);
-  }
-});
-
-shareMenuOptions?.addEventListener("click", async event => {
-  const target = event.target;
-  if (!(target instanceof HTMLElement)) return;
-  const action = target.dataset.shareAction;
-  if (!action) return;
-
-  const code = shareCodeTextarea.value.trim();
-  const list = getCurrentList();
-  const listName = list ? list.name : "list";
-  const shareText = `Price calculator list "${listName}": ${code}`;
-
-  if (action === "copy") {
-    try {
-      await navigator.clipboard.writeText(code);
-      showMessage("info", "Share code copied.");
-    } catch {
-      showMessage("error", "Could not copy to clipboard.");
-    }
-  } else if (action === "whatsapp") {
-    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-    window.open(url, "_blank");
-  } else if (action === "sms") {
-    const url = `sms:?body=${encodeURIComponent(shareText)}`;
-    window.open(url, "_self");
-  }
-
-  toggleShareMenu(false);
-});
-
-generateSummaryBtn.addEventListener("click", () => {
-  renderSummary();
-  showMessage("info", "Summary generated.");
-});
 function toggleShareMenu(openExplicitly = null) {
   if (!shareMenuOptions) return;
   const shouldOpen = openExplicitly !== null ? openExplicitly : shareMenuOptions.hidden;
