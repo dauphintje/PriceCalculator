@@ -83,11 +83,54 @@ const itemPriceInput = document.getElementById("itemPrice");
 const itemsTableBody = document.querySelector("#itemsTable tbody");
 const totalPriceSpan = document.getElementById("totalPrice");
 
+const splitPeopleInput = document.getElementById("splitPeople");
+const perPersonInput = document.getElementById("perPerson");
+
 const shareCodeTextarea = document.getElementById("shareCode");
 const refreshShareCodeBtn = document.getElementById("refreshShareCodeBtn");
 
+const summaryTextTextarea = document.getElementById("summaryText");
+const generateSummaryBtn = document.getElementById("generateSummaryBtn");
+
 const importCodeTextarea = document.getElementById("importCode");
 const importBtn = document.getElementById("importBtn");
+
+const sortByNameBtn = document.getElementById("sortByNameBtn");
+const sortByPriceBtn = document.getElementById("sortByPriceBtn");
+
+// View navigation
+const navButtons = document.querySelectorAll("[data-view-target]");
+const viewSections = document.querySelectorAll("section[data-view]");
+
+let currentView = "items"; // default view
+
+// ---------------- VIEW HANDLING ----------------
+function setView(viewName) {
+  currentView = viewName;
+  viewSections.forEach(section => {
+    const v = section.getAttribute("data-view");
+    if (v === viewName) {
+      section.classList.remove("view-hidden");
+    } else {
+      section.classList.add("view-hidden");
+    }
+  });
+
+  navButtons.forEach(btn => {
+    if (btn.getAttribute("data-view-target") === viewName) {
+      btn.classList.add("contrast");
+    } else {
+      btn.classList.remove("contrast");
+    }
+  });
+}
+
+navButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.getAttribute("data-view-target");
+    setView(target);
+  });
+});
 
 // ---------------- RENDER FUNCTIONS ----------------
 function renderListSelect() {
@@ -104,7 +147,6 @@ function renderListSelect() {
 function deleteItemAtIndex(index) {
   const list = getCurrentList();
   if (!list) return;
-
   if (index < 0 || index >= list.items.length) return;
 
   list.items.splice(index, 1);
@@ -112,6 +154,7 @@ function deleteItemAtIndex(index) {
   renderItems();
   renderTotal();
   renderShareCode();
+  updatePerPerson();
 }
 
 function renderItems() {
@@ -130,14 +173,28 @@ function renderItems() {
     priceTd.textContent = item.price.toFixed(2);
 
     const actionsTd = document.createElement("td");
+
+    // Edit button
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.textContent = "Edit";
+    editBtn.className = "secondary";
+    editBtn.addEventListener("click", () => {
+      editItem(index);
+    });
+
+    // Delete button
     const deleteBtn = document.createElement("button");
     deleteBtn.type = "button";
     deleteBtn.textContent = "Delete";
-    deleteBtn.className = "secondary";
+    deleteBtn.className = "secondary contrast";
+    deleteBtn.style.marginLeft = "0.25rem";
     deleteBtn.addEventListener("click", () => {
       const ok = confirm(`Delete "${item.name}" from this list?`);
       if (ok) deleteItemAtIndex(index);
     });
+
+    actionsTd.appendChild(editBtn);
     actionsTd.appendChild(deleteBtn);
 
     tr.appendChild(nameTd);
@@ -157,6 +214,22 @@ function renderTotal() {
   totalPriceSpan.textContent = total.toFixed(2);
 }
 
+function updatePerPerson() {
+  const list = getCurrentList();
+  if (!list || !list.items.length) {
+    perPersonInput.value = "";
+    return;
+  }
+  const total = list.items.reduce((sum, item) => sum + item.price, 0);
+  let people = parseInt(splitPeopleInput.value, 10);
+  if (isNaN(people) || people <= 0) {
+    perPersonInput.value = "";
+    return;
+  }
+  const each = total / people;
+  perPersonInput.value = each.toFixed(2);
+}
+
 function renderShareCode() {
   const list = getCurrentList();
   if (!list) {
@@ -172,11 +245,35 @@ function renderShareCode() {
   shareCodeTextarea.value = code;
 }
 
+function renderSummary() {
+  const list = getCurrentList();
+  if (!list) {
+    summaryTextTextarea.value = "";
+    return;
+  }
+
+  const lines = [];
+  lines.push(`Shopping list: ${list.name}`);
+  if (!list.items.length) {
+    lines.push("No items.");
+  } else {
+    list.items.forEach(item => {
+      lines.push(`- ${item.name}: ${item.price.toFixed(2)}`);
+    });
+    const total = list.items.reduce((sum, item) => sum + item.price, 0);
+    lines.push("");
+    lines.push(`Total: ${total.toFixed(2)}`);
+  }
+
+  summaryTextTextarea.value = lines.join("\n");
+}
+
 function renderAll() {
   renderListSelect();
   renderItems();
   renderTotal();
   renderShareCode();
+  updatePerPerson();
 }
 
 // ---------------- LIST MANAGEMENT ----------------
@@ -193,6 +290,7 @@ createListBtn.addEventListener("click", () => {
   newListNameInput.value = "";
   saveToCookies();
   renderAll();
+  setView("items");
 });
 
 listSelect.addEventListener("change", () => {
@@ -213,6 +311,7 @@ clearItemsBtn.addEventListener("click", () => {
   renderItems();
   renderTotal();
   renderShareCode();
+  updatePerPerson();
 });
 
 deleteListBtn.addEventListener("click", () => {
@@ -225,7 +324,6 @@ deleteListBtn.addEventListener("click", () => {
     );
     if (!ok) return;
 
-    // remove the only list and create a new one
     shoppingLists = [];
     const defaultList = {
       id: generateId(),
@@ -246,9 +344,9 @@ deleteListBtn.addEventListener("click", () => {
   renderAll();
 });
 
-// ---------------- ADD ITEM ----------------
+// ---------------- ADD & EDIT ITEMS ----------------
 addItemForm.addEventListener("submit", event => {
-  event.preventDefault();
+  event.preventDefault(); // IMPORTANT: prevents page reload
 
   const list = getCurrentList();
   if (!list) return;
@@ -256,7 +354,10 @@ addItemForm.addEventListener("submit", event => {
   const name = itemNameInput.value.trim();
   const priceStr = itemPriceInput.value.trim();
 
-  if (!name || !priceStr) return;
+  if (!name || !priceStr) {
+    alert("Please fill in both name and price.");
+    return;
+  }
 
   const price = parseFloat(priceStr);
   if (isNaN(price) || price < 0) {
@@ -273,6 +374,60 @@ addItemForm.addEventListener("submit", event => {
   renderItems();
   renderTotal();
   renderShareCode();
+  updatePerPerson();
+});
+
+function editItem(index) {
+  const list = getCurrentList();
+  if (!list) return;
+  const item = list.items[index];
+  if (!item) return;
+
+  const newName = prompt("Edit item name:", item.name);
+  if (newName === null) return; // cancelled
+
+  const trimmedName = newName.trim();
+  if (!trimmedName) {
+    alert("Name cannot be empty.");
+    return;
+  }
+
+  const priceStr = prompt("Edit item price:", item.price.toFixed(2));
+  if (priceStr === null) return;
+
+  const price = parseFloat(priceStr);
+  if (isNaN(price) || price < 0) {
+    alert("Please enter a valid non-negative price.");
+    return;
+  }
+
+  list.items[index] = { name: trimmedName, price };
+  saveToCookies();
+  renderItems();
+  renderTotal();
+  renderShareCode();
+  updatePerPerson();
+}
+
+// ---------------- SORTING ----------------
+sortByNameBtn.addEventListener("click", () => {
+  const list = getCurrentList();
+  if (!list) return;
+
+  list.items.sort((a, b) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
+  saveToCookies();
+  renderItems();
+});
+
+sortByPriceBtn.addEventListener("click", () => {
+  const list = getCurrentList();
+  if (!list) return;
+
+  list.items.sort((a, b) => a.price - b.price);
+  saveToCookies();
+  renderItems();
 });
 
 // ---------------- IMPORT & MERGE ----------------
@@ -341,13 +496,25 @@ importBtn.addEventListener("click", () => {
   renderItems();
   renderTotal();
   renderShareCode();
+  updatePerPerson();
 });
 
-// ---------------- SHARE CODE REFRESH ----------------
+// ---------------- SHARE & SUMMARY ----------------
 refreshShareCodeBtn.addEventListener("click", () => {
   renderShareCode();
+});
+
+generateSummaryBtn.addEventListener("click", () => {
+  renderSummary();
+});
+
+// per-person changes
+splitPeopleInput.addEventListener("input", () => {
+  updatePerPerson();
 });
 
 // ---------------- INIT ----------------
 loadFromCookies();
 renderAll();
+setView("items"); // start on items view
+updatePerPerson();
