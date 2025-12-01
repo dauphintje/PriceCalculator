@@ -147,10 +147,7 @@ const importBtn = document.getElementById("importBtn");
 const sortSelect = document.getElementById("sortSelect");
 const searchInput = document.getElementById("searchInput");
 
-// MENU COLLAPSE
 const topBar = document.querySelector(".top-bar");
-const topBarExtra = document.getElementById("topBarExtra");
-const menuToggleBtn = document.getElementById("menuToggleBtn");
 
 // ---------------- RENDER ----------------
 function renderListSelect() {
@@ -588,25 +585,30 @@ splitPeopleInput.addEventListener("input", () => {
   updatePerPerson();
 });
 
-// ---------------- MENU COLLAPSE LOGIC ----------------
-function applyMenuCollapsed(collapsed) {
-  if (!topBar || !topBarExtra || !menuToggleBtn) return;
+// ---------------- AUTO-COLLAPSE MENU ON MOBILE SCROLL ----------------
+let lastScrollY = window.scrollY;
 
-  if (collapsed) {
-    topBar.classList.add("menu-collapsed");
-    menuToggleBtn.textContent = "More";
-  } else {
+window.addEventListener("scroll", () => {
+  if (!topBar) return;
+
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  if (!isMobile) {
+    // On desktop, never collapse
     topBar.classList.remove("menu-collapsed");
-    menuToggleBtn.textContent = "Less";
+    return;
   }
 
-  // store preference
-  saveLocal("menuCollapsed", collapsed ? "1" : "0");
-}
+  const current = window.scrollY;
 
-menuToggleBtn.addEventListener("click", () => {
-  const isCollapsed = topBar.classList.contains("menu-collapsed");
-  applyMenuCollapsed(!isCollapsed);
+  if (current > lastScrollY && current > 40) {
+    // scrolling down and not at very top → collapse
+    topBar.classList.add("menu-collapsed");
+  } else if (current < lastScrollY || current < 20) {
+    // scrolling up or near top → expand
+    topBar.classList.remove("menu-collapsed");
+  }
+
+  lastScrollY = current;
 });
 
 // ---------------- INIT ----------------
@@ -614,11 +616,3 @@ loadState();
 renderAll();
 updatePerPerson();
 showMessage("info", "Shopping lists loaded.");
-
-// restore menu collapsed state
-const menuCollapsedSaved = loadLocal("menuCollapsed");
-if (menuCollapsedSaved === "1") {
-  applyMenuCollapsed(true);
-} else {
-  applyMenuCollapsed(false);
-}
