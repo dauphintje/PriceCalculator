@@ -955,7 +955,9 @@ function setMenuOpen(open) {
   const menuVisible = isDesktop || open;
 
   if (topBarMenu) {
-    topBarMenu.hidden = !menuVisible;
+    // Ensure the element always exists in the layout so the toggle works on mobile
+    topBarMenu.hidden = false;
+    topBarMenu.style.display = menuVisible ? "flex" : "none";
   }
 
   if (menuToggle) {
