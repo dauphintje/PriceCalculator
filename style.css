@@ -1,0 +1,9 @@
+/* Optional small tweaks; Pico handles most styling */
+#itemsTable td:last-child,
+#itemsTable th:last-child {
+  text-align: right;
+}
+
+textarea {
+  resize: vertical;
+}
