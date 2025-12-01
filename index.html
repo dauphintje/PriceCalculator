@@ -11,46 +11,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header class="top-bar">
+    <div class="container top-bar-inner">
+      <h1>Shopping Lists</h1>
 
-  <!-- Main navigation (bottom on mobile, top on desktop via CSS) -->
-  <nav id="mainNav" class="nav-bar">
-    <ul>
-      <li><button type="button" data-view-target="lists" class="contrast">Lists</button></li>
-      <li><button type="button" data-view-target="items">Items</button></li>
-      <li><button type="button" data-view-target="share">Share</button></li>
-    </ul>
-  </nav>
-
-  <main class="container app-main">
-    <h1>Shopping Lists</h1>
-
-    <!-- Info / error messages -->
-    <section id="messageArea" aria-live="polite"></section>
-
-    <!-- LISTS VIEW -->
-    <section data-view="lists">
-      <h2>Lists</h2>
-      <div class="grid">
+      <div class="top-bar-controls">
         <label>
-          Current list
+          List
           <select id="listSelect"></select>
         </label>
 
         <label>
-          New list name
-          <input type="text" id="newListName" placeholder="e.g. Party, Groceries">
+          New list
+          <input type="text" id="newListName" placeholder="e.g. Groceries">
         </label>
-      </div>
 
-      <div class="grid">
-        <button id="createListBtn">Create List</button>
+        <button id="createListBtn">Create</button>
         <button id="clearItemsBtn" class="secondary">Clear items</button>
-        <button id="deleteListBtn" class="secondary contrast">Delete current list</button>
+        <button id="deleteListBtn" class="secondary contrast">Delete list</button>
       </div>
-    </section>
+    </div>
+  </header>
 
-    <!-- ITEMS VIEW -->
-    <section data-view="items">
+  <main class="container app-main">
+    <!-- Info / error messages -->
+    <section id="messageArea" aria-live="polite"></section>
+
+    <!-- ITEMS -->
+    <section>
       <h2>Items</h2>
 
       <!-- Add item -->
@@ -122,8 +110,8 @@
       </div>
     </section>
 
-    <!-- SHARE VIEW -->
-    <section data-view="share">
+    <!-- SHARE / IMPORT -->
+    <section>
       <h2>Share &amp; Import</h2>
 
       <article>
