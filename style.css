@@ -26,14 +26,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: center;
-  width: 100%;
 }
 
 .top-bar-main h1 {
   margin: 0;
   text-align: center;
-  line-height: 1.1;
 }
 
 .top-bar.menu-collapsed h1 {
@@ -145,6 +142,74 @@ body {
   gap: 0.5rem;
 }
 
+.top-bar.menu-collapsed {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.share-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.share-menu button {
+  width: 100%;
+}
+
+.share-menu-options {
+  position: absolute;
+  inset: auto 0 0 0;
+  transform: translateY(100%);
+  background: var(--pico-card-background-color, #fff);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--pico-muted-border-color);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  display: grid;
+  gap: 0.25rem;
+  z-index: 5;
+}
+
+.share-menu-options button {
+  width: 100%;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.dialog {
+  background: var(--pico-card-background-color, #fff);
+  color: inherit;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  max-width: min(480px, 90vw);
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.dialog h3 {
+  margin-top: 0;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dialog form {
+  display: grid;
+  gap: 0.5rem;
+}
+
 /* Main content spacing */
 .app-main {
   padding-block: 0.75rem 2rem;
@@ -179,54 +244,21 @@ textarea {
 
   .top-bar-inner {
     padding-block: 0.75rem;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: flex-end;
-    column-gap: 1rem;
-    row-gap: 0.35rem;
   }
 
   .top-bar-main {
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
     gap: 1rem;
-    flex-wrap: nowrap;
-    width: auto;
   }
 
   .top-bar-main h1 {
     text-align: left;
-    flex: 0 0 auto;
   }
 
   .top-bar-primary-controls {
-    flex: 1 1 auto;
-    justify-content: flex-end;
-    align-items: flex-end;
-    gap: 0.75rem;
-  }
-
-  .top-bar-primary-controls label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: auto;
-  }
-
-  .top-bar-primary-controls select {
-    min-width: 180px;
-  }
-
-  .top-bar-extra {
-    margin-top: 0;
-    align-self: stretch;
-  }
-
-  .top-bar-extra-inner {
+    flex: 1;
     justify-content: flex-start;
-    align-items: flex-end;
-    gap: 0.75rem;
-    flex-wrap: wrap;
   }
 
   /* On desktop, never hide the extra row even if menu-collapsed class is present */
