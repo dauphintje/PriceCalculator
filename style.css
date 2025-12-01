@@ -1,9 +1,95 @@
-/* Optional small tweaks; Pico handles most styling */
-#itemsTable td:last-child,
-#itemsTable th:last-child {
+/* Mobile-first: nav at bottom, slightly zoomed-in default.
+   Desktop: nav at top, slightly zoomed-out feel. */
+
+/* Ensure body doesn't hide under nav */
+body {
+  margin: 0;
+}
+
+/* Main nav bar */
+.nav-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0; /* mobile: bottom */
+  padding: 0.4rem 1rem;
+  background: var(--pico-background-color);
+  border-top: 1px solid var(--pico-muted-border-color);
+  z-index: 100;
+}
+
+.nav-bar ul {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-bar li {
+  margin: 0;
+}
+
+.nav-bar button {
+  width: 100%;
+}
+
+/* Main content: keep space for nav */
+.app-main {
+  padding-top: 1rem;
+  padding-bottom: 4rem; /* space for bottom nav */
+}
+
+/* Table tweaks */
+#itemsTable td:nth-child(2),
+#itemsTable th:nth-child(2) {
   text-align: right;
+}
+
+#itemsTable td:nth-child(3),
+#itemsTable th:nth-child(3) {
+  text-align: center;
 }
 
 textarea {
   resize: vertical;
+}
+
+/* Simple hidden class for views */
+.view-hidden {
+  display: none;
+}
+
+/* Desktop / larger screens */
+@media (min-width: 768px) {
+  /* nav at top, more “zoomed out” */
+  html {
+    font-size: 15px; /* slightly smaller than default */
+  }
+
+  .nav-bar {
+    top: 0;
+    bottom: auto;
+    border-top: none;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+  }
+
+  .app-main {
+    padding-top: 4rem;   /* space for top nav */
+    padding-bottom: 2rem;
+  }
+
+  .nav-bar ul {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .nav-bar li {
+    width: auto;
+  }
+
+  .nav-bar button {
+    width: auto;
+  }
 }
