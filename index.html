@@ -29,26 +29,13 @@
     <div class="container top-bar-inner">
       <!-- Top bar content -->
       <div class="top-bar-main">
-        <p class="app-title" aria-label="Price calculator">price calculator</p>
+        <h1 class="app-title" aria-label="Price calculator">Price Calculator</h1>
 
         <div class="top-bar-primary-controls">
           <label>
             List
             <select id="listSelect"></select>
           </label>
-        </div>
-
-        <div class="top-bar-extra" id="topBarExtra">
-          <div class="top-bar-extra-inner">
-            <label>
-              New list
-              <input type="text" id="newListName" placeholder="e.g. Groceries">
-            </label>
-
-            <button id="createListBtn">Create</button>
-            <button id="clearItemsBtn" class="secondary">Clear items</button>
-            <button id="deleteListBtn" class="secondary contrast">Delete list</button>
-          </div>
         </div>
       </div>
     </div>
@@ -57,6 +44,20 @@
   <main class="container app-main">
     <!-- Info / error messages -->
     <section id="messageArea" aria-live="polite"></section>
+
+    <!-- List management (moved from top bar) -->
+    <section class="list-management">
+      <div class="list-management-inner">
+        <label>
+          New list
+          <input type="text" id="newListName" placeholder="e.g. Groceries">
+        </label>
+
+        <button id="createListBtn">Create</button>
+        <button id="clearItemsBtn" class="secondary">Clear items</button>
+        <button id="deleteListBtn" class="secondary contrast">Delete list</button>
+      </div>
+    </section>
 
     <!-- ITEMS -->
     <section>
