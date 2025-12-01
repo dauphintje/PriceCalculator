@@ -18,7 +18,6 @@ function getCookie(name) {
 let shoppingLists = [];
 let currentListId = null;
 
-// generate simple unique id
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 }
@@ -75,6 +74,8 @@ function loadFromCookies() {
 const listSelect = document.getElementById("listSelect");
 const newListNameInput = document.getElementById("newListName");
 const createListBtn = document.getElementById("createListBtn");
+const clearItemsBtn = document.getElementById("clearItemsBtn");
+const deleteListBtn = document.getElementById("deleteListBtn");
 
 const addItemForm = document.getElementById("addItemForm");
 const itemNameInput = document.getElementById("itemName");
@@ -100,12 +101,26 @@ function renderListSelect() {
   });
 }
 
+function deleteItemAtIndex(index) {
+  const list = getCurrentList();
+  if (!list) return;
+
+  if (index < 0 || index >= list.items.length) return;
+
+  list.items.splice(index, 1);
+  saveToCookies();
+  renderItems();
+  renderTotal();
+  renderShareCode();
+}
+
 function renderItems() {
   const list = getCurrentList();
   if (!list) return;
 
   itemsTableBody.innerHTML = "";
-  list.items.forEach(item => {
+
+  list.items.forEach((item, index) => {
     const tr = document.createElement("tr");
 
     const nameTd = document.createElement("td");
@@ -114,8 +129,20 @@ function renderItems() {
     const priceTd = document.createElement("td");
     priceTd.textContent = item.price.toFixed(2);
 
+    const actionsTd = document.createElement("td");
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.className = "secondary";
+    deleteBtn.addEventListener("click", () => {
+      const ok = confirm(`Delete "${item.name}" from this list?`);
+      if (ok) deleteItemAtIndex(index);
+    });
+    actionsTd.appendChild(deleteBtn);
+
     tr.appendChild(nameTd);
     tr.appendChild(priceTd);
+    tr.appendChild(actionsTd);
     itemsTableBody.appendChild(tr);
   });
 }
@@ -170,6 +197,51 @@ createListBtn.addEventListener("click", () => {
 
 listSelect.addEventListener("change", () => {
   currentListId = listSelect.value;
+  saveToCookies();
+  renderAll();
+});
+
+clearItemsBtn.addEventListener("click", () => {
+  const list = getCurrentList();
+  if (!list) return;
+
+  const ok = confirm(`Clear all items from "${list.name}"?`);
+  if (!ok) return;
+
+  list.items = [];
+  saveToCookies();
+  renderItems();
+  renderTotal();
+  renderShareCode();
+});
+
+deleteListBtn.addEventListener("click", () => {
+  const list = getCurrentList();
+  if (!list) return;
+
+  if (shoppingLists.length === 1) {
+    const ok = confirm(
+      `"${list.name}" is your only list.\nIf you delete it, a new empty default list will be created.\n\nContinue?`
+    );
+    if (!ok) return;
+
+    // remove the only list and create a new one
+    shoppingLists = [];
+    const defaultList = {
+      id: generateId(),
+      name: "Default list",
+      items: []
+    };
+    shoppingLists.push(defaultList);
+    currentListId = defaultList.id;
+  } else {
+    const ok = confirm(`Delete the list "${list.name}" and all its items?`);
+    if (!ok) return;
+
+    shoppingLists = shoppingLists.filter(l => l.id !== list.id);
+    currentListId = shoppingLists[0].id;
+  }
+
   saveToCookies();
   renderAll();
 });
@@ -240,14 +312,12 @@ importBtn.addEventListener("click", () => {
     return;
   }
 
-  // Merge with duplicate handling
   importedItems.forEach(newItem => {
     const existingIndex = list.items.findIndex(
       it => it.name.trim().toLowerCase() === newItem.name.trim().toLowerCase()
     );
 
     if (existingIndex === -1) {
-      // no duplicate, just add
       list.items.push(newItem);
     } else {
       const existing = list.items[existingIndex];
@@ -259,10 +329,8 @@ importBtn.addEventListener("click", () => {
         `Cancel = Keep both (add duplicate item)`;
 
       if (confirm(message)) {
-        // merge: update existing price
         list.items[existingIndex].price = newItem.price;
       } else {
-        // keep duplicate as separate row
         list.items.push(newItem);
       }
     }
