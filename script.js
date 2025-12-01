@@ -46,7 +46,7 @@ function renderState(data) {
 
 async function fetchState() {
     try {
-        const r = await fetch("http://localhost:5000/state");
+        const r = await fetch("pricecalculator.zeabur.app/state");
         if (!r.ok) throw 0;
         const data = await r.json();
         renderState(data);
@@ -60,7 +60,7 @@ async function fetchState() {
 
 async function fetchLog() {
     try {
-        const r = await fetch("http://localhost:5000/log");
+        const r = await fetch("pricecalculator.zeabur.app/log");
         if (!r.ok) return;
         const arr = await r.json();
         document.getElementById("log").innerHTML =
@@ -73,7 +73,7 @@ async function sendCookiesToServer() {
     const payload = {};
     for (const k in cookies) payload[k] = parseCookieValue(cookies[k]);
 
-    await fetch("http://localhost:5000/sync", {
+    await fetch("pricecalculator.zeabur.app/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -84,7 +84,7 @@ async function sendCookiesToServer() {
 }
 
 async function sendCommand() {
-    await fetch("http://localhost:5000/command", {
+    await fetch("pricecalculator.zeabur.app/command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: "Command from browser" })
@@ -103,3 +103,4 @@ setInterval(fetchLog, 1000);
 // initial
 fetchState();
 fetchLog();
+
