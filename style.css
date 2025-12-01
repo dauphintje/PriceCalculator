@@ -1,4 +1,8 @@
-/* General layout */
+/* Base: slightly larger by default for mobile readability */
+html {
+  font-size: 17px; /* mobile-first size */
+}
+
 body {
   margin: 0;
 }
@@ -24,6 +28,7 @@ body {
   text-align: center;
 }
 
+/* Controls: centered row that wraps nicely on mobile */
 .top-bar-controls {
   display: flex;
   flex-wrap: wrap;
@@ -66,8 +71,9 @@ textarea {
 
 /* Desktop / larger screens */
 @media (min-width: 768px) {
+  /* Slightly zoomed out on desktop */
   html {
-    font-size: 15px; /* slightly smaller for a zoomed-out feel */
+    font-size: 15px;
   }
 
   .top-bar-inner {
