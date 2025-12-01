@@ -73,26 +73,19 @@
             Item name
             <input type="text" id="itemName" required>
           </label>
-
-          <label>
-            Category
-            <input type="text" id="itemCategory" placeholder="e.g. Food, Drinks">
-          </label>
-        </div>
-        <div class="grid">
           <label>
             Price
             <input type="number" id="itemPrice" step="0.01" min="0" required>
           </label>
-          <button type="submit">Add to list</button>
         </div>
+        <button type="submit">Add to list</button>
       </form>
 
       <!-- Tools -->
       <div class="toolbar">
         <div class="grid">
           <label>
-            Search (name or category)
+            Search items
             <input type="search" id="searchInput" placeholder="e.g. milk, snacks">
           </label>
           <label>
@@ -111,7 +104,6 @@
         <thead>
           <tr>
             <th>Item</th>
-            <th>Category</th>
             <th style="width: 110px;">Price</th>
             <th style="width: 140px;">Actions</th>
           </tr>
