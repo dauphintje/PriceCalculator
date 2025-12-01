@@ -603,42 +603,24 @@ listSelect.addEventListener("change", () => {
   showMessage("info", "Switched list.");
 });
 
-clearItemsBtn.addEventListener("click", async () => {
-  const list = getCurrentList();
-  if (!list) return;
+  clearItemsBtn.addEventListener("click", async () => {
+    const list = getCurrentList();
+    if (!list) return;
 
-  const ok = await confirmDialog(`Clear all items from "${list.name}"?`, {
-    confirmText: "Clear"
-  });
-  if (!ok) return;
-clearItemsBtn.addEventListener("click", async () => {
-  const list = getCurrentList();
-  if (!list) return;
-
-  const ok = await confirmDialog(`Clear all items from "${list.name}"?`, {
-    confirmText: "Clear"
-  });
-  if (!ok) return;
-
-  list.items = [];
-  saveState();
-  renderItems();
-  renderTotal();
-  renderShareCode();
-  updatePerPerson();
-  showMessage("info", "All items cleared.");
-});
-
-deleteListBtn.addEventListener("click", async () => {
-  const list = getCurrentList();
-  if (!list) return;
-
-  if (shoppingLists.length === 1) {
-    const ok = await confirmDialog(
-      `"${list.name}" is your only list.\nIf you delete it, a new empty default list will be created.\n\nContinue?`,
-      { confirmText: "Delete" }
-    );
+    const ok = await confirmDialog(`Clear all items from "${list.name}"?`, {
+      confirmText: "Clear"
+    });
     if (!ok) return;
+
+    list.items = [];
+    saveState();
+    renderItems();
+    renderTotal();
+    renderShareCode();
+    updatePerPerson();
+    showMessage("info", "All items cleared.");
+  });
+
 deleteListBtn.addEventListener("click", async () => {
   const list = getCurrentList();
   if (!list) return;
@@ -658,11 +640,6 @@ deleteListBtn.addEventListener("click", async () => {
     };
     shoppingLists.push(defaultList);
     currentListId = defaultList.id;
-  } else {
-    const ok = await confirmDialog(`Delete the list "${list.name}" and all its items?`, {
-      confirmText: "Delete"
-    });
-    if (!ok) return;
   } else {
     const ok = await confirmDialog(`Delete the list "${list.name}" and all its items?`, {
       confirmText: "Delete"
@@ -727,7 +704,7 @@ searchInput.addEventListener("input", () => {
 });
 
 // ---------------- IMPORT & MERGE ----------------
-importBtn.addEventListener("click", () => {
+importBtn.addEventListener("click", async () => {
   const list = getCurrentList();
   if (!list) {
     showMessage("error", "No current list selected.");
@@ -767,32 +744,17 @@ importBtn.addEventListener("click", () => {
     return;
   }
 
-  importedItems.forEach(newItem => {
-    const existingIndex = list.items.findIndex(
-      it => it.name.trim().toLowerCase() === newItem.name.trim().toLowerCase()
-    );
+    for (const newItem of importedItems) {
+      const existingIndex = list.items.findIndex(
+        it => it.name.trim().toLowerCase() === newItem.name.trim().toLowerCase()
+      );
 
-    if (existingIndex === -1) {
-      list.items.push(newItem);
-    } else {
+      if (existingIndex === -1) {
+        list.items.push(newItem);
+        continue;
+      }
+
       const existing = list.items[existingIndex];
-      const message =
-        `Item "${newItem.name}" already exists.\n\n` +
-        `Existing price: ${existing.price.toFixed(2)}\n` +
-        `Imported price: ${newItem.price.toFixed(2)}\n\n` +
-        `Merge = use imported price & category\n` +
-        `Keep both = add duplicate item`;
-
-      const merge = await confirmDialog(message, {
-        title: "Merge duplicate?",
-        confirmText: "Merge",
-        cancelText: "Keep both"
-      });
-
-      if (merge) {
-        list.items[existingIndex].price = newItem.price;
-        list.items[existingIndex].category = newItem.category;
-      } else {
       const message =
         `Item "${newItem.name}" already exists.\n\n` +
         `Existing price: ${existing.price.toFixed(2)}\n` +
@@ -813,7 +775,6 @@ importBtn.addEventListener("click", () => {
         list.items.push(newItem);
       }
     }
-  });
 
   importCodeTextarea.value = "";
   saveState();
