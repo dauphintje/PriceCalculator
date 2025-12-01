@@ -1,6 +1,6 @@
-/* Base: slightly larger by default for mobile readability */
+/* Mobile-first: good size on iPhone */
 html {
-  font-size: 17px; /* mobile-first size */
+  font-size: 17px;
 }
 
 body {
@@ -17,36 +17,66 @@ body {
 }
 
 .top-bar-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-block: 0.75rem;
+  padding-block: 0.5rem;
 }
 
-.top-bar-inner h1 {
+/* First row of the top bar */
+.top-bar-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.top-bar-main h1 {
   margin: 0;
   text-align: center;
 }
 
-/* Controls: centered row that wraps nicely on mobile */
-.top-bar-controls {
+/* Always-visible controls: list selector + toggle */
+.top-bar-primary-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.top-bar-primary-controls label {
+  min-width: 150px;
+}
+
+#menuToggleBtn {
+  white-space: nowrap;
+}
+
+/* Collapsible extra controls */
+.top-bar-extra {
+  margin-top: 0.5rem;
+}
+
+.top-bar-extra-inner {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
 }
 
-.top-bar-controls label {
-  min-width: 140px;
+.top-bar-extra-inner label {
+  min-width: 160px;
 }
 
-.top-bar-controls button {
+.top-bar-extra-inner button {
   white-space: nowrap;
+}
+
+/* When collapsed, hide extra row */
+.top-bar.menu-collapsed .top-bar-extra {
+  display: none;
 }
 
 /* Main content spacing */
 .app-main {
-  padding-block: 1rem 2rem;
+  padding-block: 0.75rem 2rem;
 }
 
 /* Table tweaks */
@@ -77,16 +107,20 @@ textarea {
   }
 
   .top-bar-inner {
+    padding-block: 0.75rem;
+  }
+
+  .top-bar-main {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
 
-  .top-bar-inner h1 {
+  .top-bar-main h1 {
     text-align: left;
   }
 
-  .top-bar-controls {
+  .top-bar-primary-controls {
     justify-content: flex-end;
   }
 }
