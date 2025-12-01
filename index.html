@@ -27,37 +27,40 @@
 <body>
   <header class="top-bar">
     <div class="container top-bar-inner">
-      <!-- Top bar content -->
-      <div class="top-bar-main">
+      <div class="top-bar-brand">
         <h1 class="app-title" aria-label="Price calculator">Price Calculator</h1>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-label="Toggle menu">
+          <span class="menu-toggle-icon" aria-hidden="true">☰</span>
+        </button>
+      </div>
 
-        <div class="top-bar-primary-controls">
+      <nav class="top-bar-menu" aria-label="Main">
+        <div class="top-bar-row">
           <label>
             List
             <select id="listSelect"></select>
           </label>
         </div>
-      </div>
+
+        <div class="top-bar-row list-tools">
+          <label>
+            New list
+            <input type="text" id="newListName" placeholder="e.g. Groceries">
+          </label>
+
+          <div class="list-actions">
+            <button id="createListBtn">Create</button>
+            <button id="clearItemsBtn" class="secondary">Clear items</button>
+            <button id="deleteListBtn" class="secondary contrast">Delete list</button>
+          </div>
+        </div>
+      </nav>
     </div>
   </header>
 
   <main class="container app-main">
     <!-- Info / error messages -->
     <section id="messageArea" aria-live="polite"></section>
-
-    <!-- List management (moved from top bar) -->
-    <section class="list-management">
-      <div class="list-management-inner">
-        <label>
-          New list
-          <input type="text" id="newListName" placeholder="e.g. Groceries">
-        </label>
-
-        <button id="createListBtn">Create</button>
-        <button id="clearItemsBtn" class="secondary">Clear items</button>
-        <button id="deleteListBtn" class="secondary contrast">Delete list</button>
-      </div>
-    </section>
 
     <!-- ITEMS -->
     <section>
