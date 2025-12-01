@@ -26,7 +26,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: center;
 }
 
 .top-bar-main h1 {
@@ -250,8 +249,7 @@ textarea {
   .top-bar-main {
     flex-direction: row;
     align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .top-bar-main h1 {
@@ -259,23 +257,7 @@ textarea {
   }
 
   .top-bar-primary-controls {
-    flex: 0 0 auto;
-    justify-content: flex-start;
-    align-items: flex-end;
-  }
-
-  .top-bar-primary-controls label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: auto;
-  }
-
-  .top-bar-primary-controls select {
-    min-width: 180px;
-  }
-
-  .top-bar-extra-inner {
+    flex: 1;
     justify-content: flex-start;
   }
 
