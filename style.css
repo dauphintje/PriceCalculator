@@ -14,69 +14,59 @@ body {
   z-index: 50;
   background: var(--pico-background-color);
   border-bottom: 1px solid var(--pico-muted-border-color);
+  font-size: 0.95rem;
 }
 
 .top-bar-inner {
-  padding-block: 0.5rem;
+  padding-block: 0.4rem;
 }
 
 /* First row: logo + list selector */
 .top-bar-main {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  align-items: center;
 }
 
 .app-title {
   margin: 0;
   text-align: center;
-  font-size: 1.25rem;
-  letter-spacing: 0.05em;
-  text-transform: lowercase;
-  font-weight: 600;
+  font-size: 1.35rem;
+  letter-spacing: 0.03em;
+  font-weight: 700;
 }
 
 .top-bar-primary-controls {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   align-items: center;
 }
 
 .top-bar-primary-controls label {
-  min-width: 150px;
+  min-width: 140px;
 }
 
-/* Extra row: new list + buttons */
-.top-bar-extra {
-  margin-top: 0.5rem;
-  width: 100%;
-  overflow: hidden;
-  max-height: 400px;
-  transition: max-height 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
+/* List management row (moved from the top bar) */
+.list-management {
+  margin-bottom: 1rem;
 }
 
-.top-bar-extra-inner {
+.list-management-inner {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
 }
 
-.top-bar-extra-inner label {
-  min-width: 160px;
+.list-management-inner label {
+  min-width: 180px;
 }
 
-.top-bar-extra-inner button {
+.list-management-inner button {
   white-space: nowrap;
-}
-
-/* When collapsed (on mobile scroll), slide the extra row away */
-.top-bar.menu-collapsed .top-bar-extra {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-0.75rem);
 }
 
 .share-menu {
@@ -174,14 +164,14 @@ textarea {
   }
 
   .top-bar-inner {
-    padding-block: 0.75rem;
+    padding-block: 0.6rem;
   }
 
   .top-bar-main {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
-    align-items: end;
-    gap: 1rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .app-title {
@@ -192,17 +182,7 @@ textarea {
     justify-content: flex-start;
   }
 
-  .top-bar-extra {
-    margin-top: 0;
-    width: auto;
-  }
-
-  .top-bar-extra-inner {
-    justify-content: flex-end;
-  }
-
-  /* On desktop, never hide the extra row even if menu-collapsed class is present */
-  .top-bar.menu-collapsed .top-bar-extra {
-    display: block;
+  .list-management-inner {
+    justify-content: flex-start;
   }
 }
