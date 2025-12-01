@@ -147,6 +147,11 @@ const importBtn = document.getElementById("importBtn");
 const sortSelect = document.getElementById("sortSelect");
 const searchInput = document.getElementById("searchInput");
 
+// MENU COLLAPSE
+const topBar = document.querySelector(".top-bar");
+const topBarExtra = document.getElementById("topBarExtra");
+const menuToggleBtn = document.getElementById("menuToggleBtn");
+
 // ---------------- RENDER ----------------
 function renderListSelect() {
   listSelect.innerHTML = "";
@@ -180,7 +185,7 @@ function editItem(index) {
   if (!item) return;
 
   const newName = prompt("Edit item name:", item.name);
-  if (newName === null) return; // cancelled
+  if (newName === null) return;
   const trimmedName = newName.trim();
   if (!trimmedName) {
     showMessage("error", "Name cannot be empty.");
@@ -272,7 +277,6 @@ function renderItems() {
 
     const actionsTd = document.createElement("td");
 
-    // Edit button
     const editBtn = document.createElement("button");
     editBtn.type = "button";
     editBtn.textContent = "Edit";
@@ -281,7 +285,6 @@ function renderItems() {
       editItem(actualIndex);
     });
 
-    // Delete button
     const deleteBtn = document.createElement("button");
     deleteBtn.type = "button";
     deleteBtn.textContent = "Delete";
@@ -581,9 +584,29 @@ generateSummaryBtn.addEventListener("click", () => {
   showMessage("info", "Summary generated.");
 });
 
-// per-person changes
 splitPeopleInput.addEventListener("input", () => {
   updatePerPerson();
+});
+
+// ---------------- MENU COLLAPSE LOGIC ----------------
+function applyMenuCollapsed(collapsed) {
+  if (!topBar || !topBarExtra || !menuToggleBtn) return;
+
+  if (collapsed) {
+    topBar.classList.add("menu-collapsed");
+    menuToggleBtn.textContent = "More";
+  } else {
+    topBar.classList.remove("menu-collapsed");
+    menuToggleBtn.textContent = "Less";
+  }
+
+  // store preference
+  saveLocal("menuCollapsed", collapsed ? "1" : "0");
+}
+
+menuToggleBtn.addEventListener("click", () => {
+  const isCollapsed = topBar.classList.contains("menu-collapsed");
+  applyMenuCollapsed(!isCollapsed);
 });
 
 // ---------------- INIT ----------------
@@ -591,3 +614,11 @@ loadState();
 renderAll();
 updatePerPerson();
 showMessage("info", "Shopping lists loaded.");
+
+// restore menu collapsed state
+const menuCollapsedSaved = loadLocal("menuCollapsed");
+if (menuCollapsedSaved === "1") {
+  applyMenuCollapsed(true);
+} else {
+  applyMenuCollapsed(false);
+}
